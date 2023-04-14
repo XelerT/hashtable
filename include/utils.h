@@ -6,6 +6,8 @@ const int DEFAULT_N_VARS  = 16;
 const int DEFAULT_N_FUNCS = 16;
 const int DEFAULT_N_TABLS =  4;
 
+const int HASHTABLE_SIZE  = 32;
+
 struct graph_node_atr_t {
         const char *shape     = "rectangle";
         const char *style     =   "rounded";
@@ -37,6 +39,7 @@ enum main_errors {
         TOO_LONG      = 0x100104
 };
 
-void my_rol (unsigned char *val, size_t sizeof_val, size_t max_iter);
+void my_rol (void *val, size_t sizeof_val, size_t max_iter);
+void my_ror (void *val, size_t sizeof_val, size_t max_iter);
 
 #endif /*UTILS_H*/

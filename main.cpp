@@ -1,7 +1,10 @@
 #include <stdio.h>
+#include <stdlib.h>
+
 #include "include/config.h"
 #include "list/list.h"
 #include "include/text.h"
+#include "hashtable/hashtable.h"
 
 int main (int argc, char *argv[])
 {
@@ -19,6 +22,13 @@ int main (int argc, char *argv[])
         for (int i = 0; i < HASHTABLE_SIZE; i++) {
                 list_ctor(hashtable + i, 5, sizeof(data_t), sizeof(word_t*));
         }
+
+        char hash_mode = 0;
+        if (argc == 1)
+                hash_mode = 0;
+        else
+                hash_mode = *argv[1];
+        call_choosed_hash_words(&text, hashtable, hash_mode);
 
         text_dtor(&text);
 

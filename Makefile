@@ -42,8 +42,9 @@ TEXT_CFILES  = text.cpp
 LIST_CFILES  = list/list.cpp
 LOG_CFILES   = log/log.cpp
 UTILS_CFILES = utils.cpp
+HASH_CFILES  = hashtable/hashtable.cpp
 
-CFILES = main.cpp $(TEXT_CFILES) $(LIST_CFILES) $(LOG_CFILES) $(UTILS_CFILES)
+CFILES = main.cpp $(TEXT_CFILES) $(LIST_CFILES) $(LOG_CFILES) $(UTILS_CFILES) $(HASH_CFILES)
 
 OUTPUT = hash-tables.out
 

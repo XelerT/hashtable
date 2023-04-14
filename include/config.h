@@ -3,8 +3,6 @@
 
 typedef size_t elem_t;
 
-const int HASHTABLE_SIZE = 50;
-
 #define LOG_ON
 #define ASSERT_ON
 #define DEBUG
