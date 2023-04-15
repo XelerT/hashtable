@@ -120,7 +120,6 @@ void divide_text_on_words (text_t *text)
                         }
                         buf++;
                         words[n].length = buf - words[n].ptr;
-                        $d(n)
                         n++;
                 } else {
                         buf++;

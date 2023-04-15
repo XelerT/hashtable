@@ -63,7 +63,7 @@ def:
 
 .PHONY: run
 run:
-	@ ./$(OUTPUT) 2
+	@ ./$(OUTPUT) 1
 	@ echo Run
 
 .PHONY: clean
@@ -79,3 +79,7 @@ clean_cmd:
 .PHONY: graphviz
 graphviz:
 	dot -T $(IMG_FORMAT) -o $(IMG).$(IMG_FORMAT) $(DOT_FILE_NAME)
+
+.PHONY: pygraph
+pygraph:
+	python graphics/graph.py

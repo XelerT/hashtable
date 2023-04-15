@@ -30,6 +30,7 @@ int main (int argc, char *argv[])
         else
                 hash_mode = *argv[1];
         call_choosed_hash_words(&text, hashtable, hash_mode);
+        write_lists_sizes_in_file(hashtable, "graphics/one.txt");
 
         list_graph(hashtable, "list_graph.dot", "list");
 

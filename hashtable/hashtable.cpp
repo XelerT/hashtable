@@ -8,6 +8,28 @@ int write_lists_sizes_in_file (list_t *hashtable, const char *file_name)
 {
         assert(hashtable);
         assert(file_name);
+
+        FILE *output = fopen(file_name, "w");
+        if (!output) {
+                log_error(1, "FILE DIDN\'T OPEN!");
+                return NULL_FILE_PTR;
+        }
+        char buf[HASHTABLE_SIZE * 16] = {'\0'};
+        size_t n_wr_chars = 0;
+        size_t buf_size = 0;
+
+        for (size_t i = 0; i < HASHTABLE_SIZE; i++) {
+                sprintf(buf + buf_size, "%ld %ln", hashtable[i].size, &n_wr_chars);
+                buf_size += n_wr_chars;
+        }
+
+        n_wr_chars = fwrite(buf, sizeof(char), buf_size, output);
+
+        fclose(output);
+        if (!n_wr_chars)
+                return NULL_FWRITE;
+
+        return 0;
 }
 
 int call_choosed_hash_words (text_t *text, list_t *hashtable, char hash_mode)
@@ -54,10 +76,7 @@ int hash_words (text_t *text, list_t *hashtable, size_t (*get_word_hash)(word_t*
                         log(1, "HASH IS TOO BIG.");
                         hash = hash % HASHTABLE_SIZE;
                 }
-                // printf("elem = %ld(%p, %c, %p); hash = %ld; size = %ld\n", i, text->words + i, *((text->words + i)->ptr), (text->words + i)->ptr, hash, hashtable[hash].size);
                 list_insert(hashtable + hash, (void*) (text->words + i), hashtable[hash].size, sizeof(text->words));
-                // printf("pointeer  %p %p\n", &(hashtable + hash)->data[hashtable[hash].size], (word_t*) (hashtable + hash)->data[hashtable[hash].size].data);
-                // printf("%p \n", (word_t*) hashtable->data[hashtable[0].size].data);
         }
 
         return 0;

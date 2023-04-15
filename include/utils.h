@@ -37,7 +37,8 @@ enum main_errors {
         REALLOC_ERR   = 0xBADA110C,
         LEX_ERROR     = 0xBAD1E4,
         NULL_SPRINTF  = 0xBAD366,
-        TOO_LONG      = 0x100104
+        TOO_LONG      = 0x100104,
+        NULL_FWRITE   = 0xBADF44
 };
 
 void my_rol (void *val, size_t sizeof_val, size_t max_iter);
