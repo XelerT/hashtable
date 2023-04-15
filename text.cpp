@@ -62,14 +62,12 @@ void delete_punctuations (text_t *text)
         char *buf = text->buf;
 
         for (size_t i = 0; i < text->n_chars; i++)
-                if (buf[i] != ' ' && !isalpha(buf[i]))
+                if (buf[i] != ' ' && !isalpha(buf[i]) && buf[i] != '\'') {
                         buf[i] = '\0';
-                else if (buf[i] == ' ') {
-                        if (buf[i + 1] == ' ') {
-                                buf[i + 1] = '\0';
-                                continue;
-                        }
-                        text->n_words++;
+                } else if (buf[i] == ' ') {
+                        buf[i] = '\0';
+                        if (isalpha(buf[i - 1]))
+                                text->n_words++;
                 }
 }
 
@@ -114,14 +112,19 @@ void divide_text_on_words (text_t *text)
         }
         text->words = words;
         for (size_t i = 0, n = 0; i < text->n_chars; i++)      {
-                words[n].ptr = buf;
-                while (*buf != '\n' && *buf != '\0' && *buf != ' ') {
+                if (*buf != '\0') {
+                        words[n].ptr = buf;
+                        while (*buf != '\0') {
+                                buf++;
+                                i++;
+                        }
                         buf++;
-                        i++;
+                        words[n].length = buf - words[n].ptr;
+                        $d(n)
+                        n++;
+                } else {
+                        buf++;
                 }
-                buf++;
-                words[n].length = buf - words[n].ptr;
-                n++;
         }
 }
 

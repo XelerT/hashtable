@@ -4,6 +4,12 @@
 
 #include "hashtable.h"
 
+int write_lists_sizes_in_file (list_t *hashtable, const char *file_name)
+{
+        assert(hashtable);
+        assert(file_name);
+}
+
 int call_choosed_hash_words (text_t *text, list_t *hashtable, char hash_mode)
 {
         assert(text);
@@ -48,7 +54,10 @@ int hash_words (text_t *text, list_t *hashtable, size_t (*get_word_hash)(word_t*
                         log(1, "HASH IS TOO BIG.");
                         hash = hash % HASHTABLE_SIZE;
                 }
-                list_insert(hashtable + hash, (unsigned char*) (text->words + i), hashtable[hash].size, sizeof(text->words));
+                // printf("elem = %ld(%p, %c, %p); hash = %ld; size = %ld\n", i, text->words + i, *((text->words + i)->ptr), (text->words + i)->ptr, hash, hashtable[hash].size);
+                list_insert(hashtable + hash, (void*) (text->words + i), hashtable[hash].size, sizeof(text->words));
+                // printf("pointeer  %p %p\n", &(hashtable + hash)->data[hashtable[hash].size], (word_t*) (hashtable + hash)->data[hashtable[hash].size].data);
+                // printf("%p \n", (word_t*) hashtable->data[hashtable[0].size].data);
         }
 
         return 0;

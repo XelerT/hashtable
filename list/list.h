@@ -27,17 +27,19 @@ struct data_t {
 };
 
 struct list_t {
-        data_t *data    = {};
+        data_t *data    = nullptr;
         data_t *free    = nullptr;
         size_t capacity = 0;
         size_t size     = 0;
+
+        graph_node_atr_t data_atr = {};
 };
 
 int list_ctor       (list_t *list, size_t capacity, size_t sizeof_data, size_t sizeof_elem);
-int list_insert     (list_t *list, unsigned char *val, size_t position, size_t sizeof_elem);
+int list_insert     (list_t *list, void *val, size_t position, size_t sizeof_elem);
 elem_t list_delete  (list_t *list, size_t position, size_t sizeof_elem);
 int list_dtor       (list_t *list);
-int list_resize     (list_t *list, size_t coeff);
+int list_resize     (list_t *list, size_t coeff, size_t sizeof_elem);
 int list_linearize  (list_t *list, size_t sizeof_elem);
 
 #endif /*LIST_H*/

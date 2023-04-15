@@ -3,6 +3,7 @@
 #include <assert.h>
 
  #include "list.h"
+#include "../include/text.h"
 
 static size_t fill_free (list_t *list, size_t position, size_t sizeof_elem);
 
@@ -42,26 +43,25 @@ static size_t fill_free (list_t *list, size_t position, size_t sizeof_elem)
         return i - 1;
 }
 
-int list_insert (list_t *list, unsigned char *val, size_t position, size_t sizeof_elem)
+int list_insert (list_t *list, void *val, size_t position, size_t sizeof_elem)
 {
         assert(list);
+
+        if (list->size * 2 >= list->capacity)
+                if (list_resize(list, 2, sizeof_elem))
+                        return RESIZE_ERR;
 
         data_t *data = list->data;
         data_t *free = list->free;
         size_t new_free = free->next;
 
-        if (list->size >= list->capacity)
-                if (list_resize(list, 2))
-                        return RESIZE_ERR;
-
         memcpy(&free->data, val, sizeof_elem);
-        *free = {
-                .next = data[position].next,
-                .prev = position,
-        };
 
-        data[position].next   = free - data;
-        data[free->next].prev = free - data;
+        free->next = data[position].next;
+        free->prev = position;
+
+        data[position].next = free - data;
+        data[new_free].prev = free - data;
 
         list->free       = data + new_free;
         list->free->prev = free - data;
@@ -70,14 +70,19 @@ int list_insert (list_t *list, unsigned char *val, size_t position, size_t sizeo
         return 0;
 }
 
-int list_resize (list_t *list, size_t coeff)
+int list_resize (list_t *list, size_t coeff, size_t sizeof_elem)
 {
         assert(list);
 
-        data_t *data = (data_t*) realloc(list->data, list->capacity * coeff);
+        data_t *data = (data_t*) realloc(list->data, list->capacity * coeff * sizeof(data_t));
         if (!data)
                 return RESIZE_ERR;
+
+        list->free = list->free - list->data + data;
+        list->data = data;
         list->capacity = list->capacity * coeff;
+
+        fill_free(list, list->free - list->data, sizeof_elem);
 
         return 0;
 }

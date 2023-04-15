@@ -5,6 +5,7 @@
 #include "list/list.h"
 #include "include/text.h"
 #include "hashtable/hashtable.h"
+#include "list/list_dump.h"
 
 int main (int argc, char *argv[])
 {
@@ -29,6 +30,8 @@ int main (int argc, char *argv[])
         else
                 hash_mode = *argv[1];
         call_choosed_hash_words(&text, hashtable, hash_mode);
+
+        list_graph(hashtable, "list_graph.dot", "list");
 
         text_dtor(&text);
 

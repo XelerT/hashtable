@@ -13,10 +13,11 @@ struct graph_node_atr_t {
         const char *style     =   "rounded";
         const char *fixedsize =     "false";
         const char *fillcolor =   "#00b899";
-        int height   =  3;
-        int width    =  2;
-        int fontsize = 30;
-        int penwidth =  5;
+        int height    =  3;
+        int width     =  2;
+        int fontsize  = 30;
+        int penwidth  =  5;
+        int arrowsize =  2;
 };
 
 struct edge_t {
@@ -25,7 +26,7 @@ struct edge_t {
 };
 
 struct digraph_t {
-        int dpi             =     300;
+        int dpi             =     150;
         const char *splines = "ortho";
 };
 
