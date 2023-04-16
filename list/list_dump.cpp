@@ -102,7 +102,7 @@ void print_gv_nodes (list_t *list)
         assert(list);
 
         for (size_t i = 1; i < list->size; i++) {
-                // printf("list = %ld; elem = %ld\n", n, i);
+                // printf("elem = %ld, next = %ld\n", i, list->data[i].next);
                 gv_print(node_atr_sample, list->data + i, list->data_atr.shape, list->data_atr.style, list->data_atr.height,
                 list->data_atr.width, list->data_atr.fixedsize, list->data_atr.fillcolor,list->data_atr.fontsize,
                 list->data_atr.penwidth);
@@ -117,7 +117,7 @@ void tie_gv_nodes (list_t *list)
         assert(list);
 
         for (size_t i = 1; i < list->size; i++) {
-                gv_print(nodes_tie_atr, list->data + i, list->data + list->data[i].next, "black", list->data_atr.arrowsize, list->data_atr.penwidth);
+                gv_print(nodes_tie_atr, list->data + i, list->data + list->data[i].next + 1, "black", list->data_atr.arrowsize, list->data_atr.penwidth);
                 gv_print(nodes_tie_atr, list->data + i, list->data + list->data[i].prev, "red", list->data_atr.arrowsize, list->data_atr.penwidth);
         }
 }

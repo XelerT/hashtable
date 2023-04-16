@@ -111,7 +111,7 @@ void divide_text_on_words (text_t *text)
                 assert(words);
         }
         text->words = words;
-        for (size_t i = 0, n = 0; i < text->n_chars; i++)      {
+        for (size_t i = 0, n = 0; i < text->n_chars; i++) {
                 if (*buf != '\0') {
                         words[n].ptr = buf;
                         while (*buf != '\0') {

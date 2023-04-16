@@ -30,9 +30,12 @@ int main (int argc, char *argv[])
         else
                 hash_mode = *argv[1];
         call_choosed_hash_words(&text, hashtable, hash_mode);
-        write_lists_sizes_in_file(hashtable, "graphics/one.txt");
+        write_lists_sizes_in_file(hashtable, "graphics/crc32.txt");
 
-        list_graph(hashtable, "list_graph.dot", "list");
+        // list_graph(hashtable, "list_graph.dot", "list");
+
+        word_t my_word = {"coffee", 7};
+        find_elem(hashtable, &my_word, get_crc32_hash);
 
         text_dtor(&text);
 

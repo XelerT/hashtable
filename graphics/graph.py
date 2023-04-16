@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-hash_files = ["one", "ascii", "length", "ascii_sum", "rol", "ror", "my_hash"]
+hash_files = ["one", "ascii", "length", "ascii_sum", "rol", "ror", "my_hash", "crc32"]
 
 for n in range(len(hash_files)):
         file_string = "graphics/" + hash_files[n] + ".txt"

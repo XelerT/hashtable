@@ -63,7 +63,7 @@ def:
 
 .PHONY: run
 run:
-	@ ./$(OUTPUT) 1
+	@ ./$(OUTPUT)
 	@ echo Run
 
 .PHONY: clean
