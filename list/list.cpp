@@ -75,8 +75,10 @@ int list_resize (list_t *list, size_t coeff, size_t sizeof_elem)
         assert(list);
 
         data_t *data = (data_t*) realloc(list->data, list->capacity * coeff * sizeof(data_t));
-        if (!data)
+        if (!data) {
+                log_error(1, "RESIZE RETURN NULL.");
                 return RESIZE_ERR;
+        }
 
         list->free = list->free - list->data + data;
         list->data = data;
@@ -119,8 +121,9 @@ elem_t list_delete (list_t *list, size_t position, size_t sizeof_elem)
 
 int list_dtor (list_t *list)
 {
-        if (list != nullptr) {
+        if (list && list->data) {
                 free(list->data);
+                list->data = nullptr;
                 return 0;
         }
 

@@ -62,12 +62,8 @@ void delete_punctuations (text_t *text)
         char *buf = text->buf;
 
         for (size_t i = 0; i < text->n_chars; i++)
-                if (buf[i] != ' ' && !isalpha(buf[i]) && buf[i] != '\'') {
+                if (!isalpha(buf[i]) && buf[i] != '\'') {
                         buf[i] = '\0';
-                } else if (buf[i] == ' ') {
-                        buf[i] = '\0';
-                        if (isalpha(buf[i - 1]))
-                                text->n_words++;
                 }
 }
 
@@ -96,6 +92,16 @@ void divide_text_on_lines (text_t *text)
         }
 }
 
+void text_count_words (text_t *text)
+{
+        assert(text);
+
+        for (size_t i = 0; i < text->n_chars; i++) {
+                if (text->buf[i] == '\0' && (isalpha(text->buf[i + 1]) || text->buf[i + 1] == '\''))
+                        text->n_words++;
+        }
+}
+
 void divide_text_on_words (text_t *text)
 {
         if (!text) {
@@ -105,7 +111,8 @@ void divide_text_on_words (text_t *text)
 
         char *buf = text->buf;
 
-        word_t *words = (word_t*) calloc(text->n_words, sizeof(word_t));
+        text_count_words(text);
+        word_t *words = (word_t*) calloc(text->n_words + 1, sizeof(word_t));
         if (!words) {
                 log(1, "Calloc returned NULL.");
                 assert(words);
@@ -131,12 +138,16 @@ void text_dtor (text_t *text)
 {
         assert(text);
 
-        free(text->words);
-        text->words = nullptr;
-
-        free(text->lines);
-        text->lines = nullptr;
-
-        free(text->buf);
-        text->buf  = nullptr;
+        if (text->words) {
+                free(text->words);
+                text->words = nullptr;
+        }
+        if (text->lines){
+                free(text->lines);
+                text->lines = nullptr;
+        }
+        if (text->buf) {
+                free(text->buf);
+                text->buf  = nullptr;
+        }
 }

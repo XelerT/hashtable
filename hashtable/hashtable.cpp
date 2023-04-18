@@ -6,87 +6,125 @@
 
 #include "hashtable.h"
 
-int write_lists_sizes_in_file (list_t *hashtable, const char *file_name)
+int hashtable_ctor (hashtable_t *hashtable, size_t capacity)
 {
         assert(hashtable);
-        assert(file_name);
 
-        FILE *output = fopen(file_name, "w");
-        if (!output) {
-                log_error(1, "FILE DIDN\'T OPEN!");
-                return NULL_FILE_PTR;
-        }
-        char buf[HASHTABLE_SIZE * 16] = {'\0'};
-        size_t n_wr_chars = 0;
-        size_t buf_size   = 0;
-
-        for (size_t i = 0; i < HASHTABLE_SIZE; i++) {
-                sprintf(buf + buf_size, "%ld %ln", hashtable[i].size, &n_wr_chars);
-                buf_size += n_wr_chars;
+        hashtable->lists = (list_t*) calloc(capacity, sizeof(list_t));
+        if (!hashtable->lists) {
+                log(1, "Null calloc for hashtable lists.");
+                return NULL_CALLOC;
         }
 
-        n_wr_chars = fwrite(buf, sizeof(char), buf_size, output);
-
-        fclose(output);
-        if (!n_wr_chars)
-                return NULL_FWRITE;
+        for (size_t i = 0; i < capacity; i++) {
+                list_ctor(hashtable->lists + i, 5, sizeof(data_t), sizeof(word_t*));
+        }
+        hashtable->capacity = capacity;
 
         return 0;
 }
 
-int call_choosed_hash_words (text_t *text, list_t *hashtable, char hash_mode)
+int hashtable_dtor (hashtable_t *hashtable)
+{
+        assert(hashtable);
+        assert(hashtable->lists);
+
+        for (size_t i = 0; i < hashtable->capacity; i++)
+                list_dtor(hashtable->lists + i);
+
+        free(hashtable->lists);
+        hashtable->lists = nullptr;
+
+        return 0;
+}
+
+int write_lists_sizes_in_file (hashtable_t *hashtable, char *buf)
+{
+        assert(hashtable);
+        assert(buf);
+
+        int n_wr_chars = 0;
+        int buf_size   = 0;
+
+        for (size_t i = 0; i < HASHTABLE_SIZE; i++) {
+                sprintf(buf + buf_size, " %ld%n", hashtable->lists[i].size, &n_wr_chars);
+                buf_size += n_wr_chars;
+        }
+
+        if (!n_wr_chars)
+                return NULL_FWRITE;
+
+        return buf_size;
+}
+
+int hash_words (text_t *text, hashtable_t *hashtable, char hash_mode)
 {
         assert(text);
         assert(hashtable);
 
         switch (hash_mode) {
         case '1':
-                hash_words(text, hashtable, get_one_hash);
+                fill_words_hashtable(text, hashtable, get_one_hash);
                 break;
         case '2':
-                hash_words(text, hashtable, get_ascii_hash);
+                fill_words_hashtable(text, hashtable, get_ascii_hash);
                 break;
         case '3':
-                hash_words(text, hashtable, get_length_hash);
+                fill_words_hashtable(text, hashtable, get_length_hash);
                 break;
         case '4':
-                hash_words(text, hashtable, get_sum_ascii_hash);
+                fill_words_hashtable(text, hashtable, get_sum_ascii_hash);
                 break;
         case '5':
-                hash_words(text, hashtable, get_rol_hash);
+                fill_words_hashtable(text, hashtable, get_rol_hash);
                 break;
         case '6':
-                hash_words(text, hashtable, get_ror_hash);
+                fill_words_hashtable(text, hashtable, get_ror_hash);
                 break;
         case '7':
-                hash_words(text, hashtable, get_my_hash);
+                fill_words_hashtable(text, hashtable, get_my_hash);
                 break;
         default:
-                hash_words(text, hashtable, get_crc32_hash);
+                fill_words_hashtable(text, hashtable, get_crc32_hash);
         }
         return 0;
 }
 
-int find_elem (list_t *hashtable, word_t *word, size_t (*get_word_hash)(word_t*))
+size_t find_words_crc32 (hashtable_t *hashtable, word_t *words, size_t n_words)
+{
+        assert(hashtable);
+        assert(words);
+
+        size_t found_n_words = 0;
+
+        clock_t start_time = clock();
+
+        for (size_t i = 0; i < n_words; i++) {
+                if (!find_elem(hashtable, words + i, get_crc32_hash))
+                        found_n_words++;
+        }
+
+        clock_t end_time = clock();
+
+        float delta = 1000.f * (float) (end_time - start_time) / CLOCKS_PER_SEC;
+        printf("Time to find %ld words was %.4f ms.\n", n_words, delta);
+
+        return found_n_words;
+}
+
+int find_elem (hashtable_t *hashtable, word_t *word, hash_func_t get_word_hash)
 {
         assert(hashtable);
         assert(word);
 
         size_t hash = get_word_hash(word);
-        if (hash >= HASHTABLE_SIZE) {
+        if (hash >= hashtable->capacity) {
                 log(1, "HASH IS TOO BIG.");
-                hash = hash % HASHTABLE_SIZE;
+                hash = hash % hashtable->capacity;
         }
 
-        clock_t start_time = clock();
-
-        if (!find_word_in_list(hashtable + hash, word, 1))
-                printf("No such word.\n");
-
-        clock_t end_time = clock();
-
-        float delta = 1000.f * (float) (end_time - start_time) / CLOCKS_PER_SEC;
-        printf("Time to find \"%s\" was %.4f ms.\n", word->ptr, delta);
+        if (!find_word_in_list(hashtable->lists + hash, word, 1))
+                return NO_ELEMENT;
 
         return 0;
 }
@@ -108,22 +146,37 @@ bool find_word_in_list (list_t *list, word_t *word, size_t position)
         return false;
 }
 
-int hash_words (text_t *text, list_t *hashtable, size_t (*get_word_hash)(word_t*))
+bool find_word_in_hashtable (hashtable_t *hashtable, word_t *word)
+{
+        assert(hashtable);
+        assert(word);
+
+        for (size_t i = 0; i < hashtable->capacity; i++) {
+                if (find_word_in_list(hashtable->lists + i, word, 1))
+                        return true;
+        }
+
+        return false;
+}
+
+int fill_words_hashtable (text_t *text, hashtable_t *hashtable, hash_func_t get_word_hash)
 {
         assert(text);
         assert(hashtable);
 
         size_t hash = 0;
+        int again = 0;
 
         for (size_t i = 0; i < text->n_words; i++) {
                 hash = get_word_hash(text->words + i);
-                if (hash >= HASHTABLE_SIZE) {
-                        log(1, "HASH IS TOO BIG.");
-                        hash = hash % HASHTABLE_SIZE;
+                if (hash >= hashtable->capacity)
+                        hash = hash % hashtable->capacity;
+                if (find_word_in_list(hashtable->lists + hash, text->words + i, 1)) {
+                        again++;
+                        continue;
                 }
-                list_insert(hashtable + hash, (void*) (text->words + i), hashtable[hash].size, sizeof(text->words));
+                list_insert(hashtable->lists + hash, (void*) (text->words + i), hashtable->lists[hash].size, sizeof(text->words));
         }
-
         return 0;
 }
 
@@ -215,4 +268,82 @@ size_t get_crc32_hash (word_t *word)
                 }
         }
         return ~hash;
+}
+
+static const int  N_HASH_FUNCS = 8;
+const char *hash_funcs_names[] = {
+                                        "one",
+                                        "ascii",
+                                        "length",
+                                        "ascii_sum",
+                                        "rol",
+                                        "ror",
+                                        "my",
+                                        "crc32"
+};
+
+int test_all_hash_funcs (const char *input_file_name)
+{
+        assert(input_file_name);
+
+        FILE *input_file = fopen(input_file_name, "r");
+        if (!input_file) {
+                log(1, "NULL FILE.");
+                return NULL_FILE_PTR;
+        }
+        text_t text = {};
+        get_text(input_file, &text, input_file_name);
+        fclose(input_file);
+
+        delete_punctuations(&text);
+        divide_text_on_words(&text);
+
+        hashtable_t hashtable = {};
+        hashtable_ctor(&hashtable, HASHTABLE_SIZE);
+        for (size_t n = 0; n < hashtable.capacity; n++)
+                list_dtor(hashtable.lists + n);
+
+        hash_func_t funcs_array[N_HASH_FUNCS] = {
+                get_one_hash,
+                get_ascii_hash,
+                get_length_hash,
+                get_sum_ascii_hash,
+                get_rol_hash,
+                get_ror_hash,
+                get_my_hash,
+                get_crc32_hash
+        };
+
+        FILE *output = fopen("graphics/test_all.txt", "w");
+        char buf[HASHTABLE_SIZE * 64] = {'\0'};
+        int buf_size = 0;
+        int n_wr_chars = 0;
+
+        if (!output) {
+                log_error(1, "FILE DIDN\'T OPEN!");
+                return NULL_FILE_PTR;
+        }
+        for (int i = 0; i < N_HASH_FUNCS; i++) {
+                for (size_t n = 0; n < hashtable.capacity; n++)
+                        list_ctor(hashtable.lists + n, 5, sizeof(data_t), sizeof(word_t*));
+
+                fill_words_hashtable(&text, &hashtable, funcs_array[i]);
+
+                sprintf(buf + buf_size, "%s %n", hash_funcs_names[i], &n_wr_chars);
+                buf_size += n_wr_chars;
+                buf_size += write_lists_sizes_in_file(&hashtable, buf + buf_size);
+                buf[buf_size++] = '\n';
+
+                for (size_t n = 0; n < hashtable.capacity; n++)
+                        list_dtor(hashtable.lists + n);
+                // printf("Tested hash function number %d\n", i);
+        }
+
+        fwrite(buf, sizeof(char), buf_size, output);
+        fclose(output);
+
+        text_dtor(&text);
+        hashtable_dtor(&hashtable);
+
+        return 0;
 }

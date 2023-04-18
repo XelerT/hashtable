@@ -54,7 +54,7 @@ DOT_FILE_NAME   = list_graph.dot
 
 all:
 	@ clear
-	@ g++ -o $(OUTPUT) $(CFLAGS) $(CFILES) -lasan
+	@ g++ -o $(OUTPUT) $(CFLAGS) $(CFILES) -lasan -fsanitize=address,leak
 	@ echo Compiled c-files
 
 .PHONY: def

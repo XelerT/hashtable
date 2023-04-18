@@ -11,36 +11,50 @@ int main (int argc, char *argv[])
 {
         log_init("hashtable_logs.html");
 
-        FILE *input_file = fopen("input.txt", "r");
-        text_t text = {};
-        get_text(input_file, &text, "input.txt");
+        test_all_hash_funcs("input.txt");
 
-        delete_punctuations(&text);
-        divide_text_on_words(&text);
+//         FILE *input_file = fopen("input.txt", "r");
+//         text_t text = {};
+//         get_text(input_file, &text, "input.txt");
+//         fclose(input_file);
+//
+//         delete_punctuations(&text);
+//         divide_text_on_words(&text);
+//
+//         char hash_mode = 0;
+//         if (argc == 1)
+//                 hash_mode = 0;
+//         else
+//                 hash_mode = *argv[1];
+//         hashtable_t hashtable = {};
+//         hashtable_ctor(&hashtable, HASHTABLE_SIZE);
+//
+//         hash_words(&text, &hashtable, hash_mode);
+//         write_lists_sizes_in_file(&hashtable, "graphics/crc32.txt");
+//
+//         FILE *file_to_find = fopen("to_find.txt", "r");
+//         if (!file_to_find) {
+//                 log(1, "NULL FILE PTR.");
+//                 text_dtor(&text);
+//                 hashtable_dtor(&hashtable);
+//                 log_dtor();
+//
+//                 return NULL_FILE_PTR;
+//         }
+//
+//         text_t text_words2find = {};
+//         get_text(file_to_find, &text_words2find, "to_find.txt");
+//         fclose(file_to_find);
+//
+//         delete_punctuations(&text_words2find);
+//         divide_text_on_words(&text_words2find);
+//
+//         printf("Found %ld words\n", find_words_crc32(&hashtable, text_words2find.words, text_words2find.n_words));
+//
+//         text_dtor(&text);
+//         text_dtor(&text_words2find);
+//         hashtable_dtor(&hashtable);
 
-        list_t hashtable[HASHTABLE_SIZE] = {};
-
-        for (int i = 0; i < HASHTABLE_SIZE; i++) {
-                list_ctor(hashtable + i, 5, sizeof(data_t), sizeof(word_t*));
-        }
-
-        char hash_mode = 0;
-        if (argc == 1)
-                hash_mode = 0;
-        else
-                hash_mode = *argv[1];
-        call_choosed_hash_words(&text, hashtable, hash_mode);
-        write_lists_sizes_in_file(hashtable, "graphics/crc32.txt");
-
-        // list_graph(hashtable, "list_graph.dot", "list");
-
-        word_t my_word = {"coffee", 7};
-        find_elem(hashtable, &my_word, get_crc32_hash);
-
-        text_dtor(&text);
-
-        for (int i = 0; i < HASHTABLE_SIZE; i++)
-                list_dtor(hashtable + i);
         log_dtor();
         return 0;
 }

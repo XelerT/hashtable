@@ -33,11 +33,15 @@ enum text_error {
 };
 
 int  get_text             (FILE *input, text_t *text, const char *file_name);
+void text_dtor            (text_t *text);
+
 void replace_n            (text_t *text);
 void delete_punctuations  (text_t *text);
+void text_count_words     (text_t *text);
+
 void divide_text_on_lines (text_t *text);
 void divide_text_on_words (text_t *text);
+
 char *skip_tabs           (char   *line);
-void text_dtor            (text_t *text);
 
 #endif /*TEXT_H*/
