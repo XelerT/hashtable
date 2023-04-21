@@ -5,6 +5,9 @@
 #include <time.h>
 
 #include "hashtable.h"
+#include "optimisation.h"
+
+extern "C" size_t asm_get_crc32_hash (word_t *word);
 
 int hashtable_ctor (hashtable_t *hashtable, size_t capacity)
 {
@@ -85,7 +88,7 @@ int hash_words (text_t *text, hashtable_t *hashtable, char hash_mode)
                 fill_words_hashtable(text, hashtable, get_my_hash);
                 break;
         default:
-                fill_words_hashtable(text, hashtable, get_crc32_hash);
+                fill_words_hashtable(text, hashtable, asm_get_crc32_hash);
         }
         return 0;
 }
@@ -97,17 +100,10 @@ size_t find_words_crc32 (hashtable_t *hashtable, word_t *words, size_t n_words)
 
         size_t found_n_words = 0;
 
-        clock_t start_time = clock();
-
         for (size_t i = 0; i < n_words; i++) {
-                if (!find_elem(hashtable, words + i, get_crc32_hash))
+                if (!find_elem(hashtable, words + i, asm_get_crc32_hash))
                         found_n_words++;
         }
-
-        clock_t end_time = clock();
-
-        float delta = 1000.f * (float) (end_time - start_time) / CLOCKS_PER_SEC;
-        printf("Time to find %ld words was %.4f ms.\n", n_words, delta);
 
         return found_n_words;
 }
@@ -118,6 +114,7 @@ int find_elem (hashtable_t *hashtable, word_t *word, hash_func_t get_word_hash)
         assert(word);
 
         size_t hash = get_word_hash(word);
+
         if (hash >= hashtable->capacity) {
                 log(1, "HASH IS TOO BIG.");
                 hash = hash % hashtable->capacity;
@@ -136,12 +133,20 @@ bool find_word_in_list (list_t *list, word_t *word, size_t position)
 
         if (list->size == 0)
                 return false;
-
-        if (!strcmp((char*) list->data[position].data, word->ptr)) {
+// $
+        /*cmpl  $0x0,-0x4(%rbp)*/
+        //
+        //avx_wordcmp((word_t*) list->data[position].data, word)
+        if (!strcmp(((word_t*) list->data[position].data)->ptr, word->ptr)) {
                 return true;
         } else if (list->data[position].next != 0) {
                 return find_word_in_list(list, word, list->data[position].next);
         }
+        // while (list->data[position].next) {
+        //         if (avx_wordcmp((word_t*) list->data[position].data, word))
+        //                 return true;
+        //         position = list->data[position].next;
+        // }
 
         return false;
 }
@@ -175,7 +180,9 @@ int fill_words_hashtable (text_t *text, hashtable_t *hashtable, hash_func_t get_
                         again++;
                         continue;
                 }
-                list_insert(hashtable->lists + hash, (void*) (text->words + i), hashtable->lists[hash].size, sizeof(text->words));
+                word_t* temp2 = (text->words + i);
+                word_t** temp = &temp2;
+                list_insert(hashtable->lists + hash, (void*) temp, hashtable->lists[hash].size, sizeof(word_t*));
         }
         return 0;
 }
@@ -259,11 +266,21 @@ size_t get_crc32_hash (word_t *word)
         for (size_t i = 0; i < word->length; i++) {
                 char c = word->ptr[i];
                 for (size_t j = 0; j < 8; j++) {
+        /*  3.18 │71:   movsbl -0x19(%rbp),%eax                                                                                               ▒
+            3.08 │      xor    -0x18(%rbp),%eax                                                                                               ▒
+            2.86 │      and    $0x1,%eax                                                                                                      ▒
+            6.47 │      mov    %eax,-0x14(%rbp) */
                         bit = (c ^ hash) & 1;
                         hash >>= 1;
 
-                        if (bit)
+       //  12.15 │      cmpl   $0x0,-0x14(%rbp)
+                        if (bit) {
+                /* 17.78 │      mov    -0x18(%rbp),%eax                                                                                               ▒
+                    1.26 │      xor    $0xedb88320,%eax                                                                                               ▒
+                    2.23 │      mov    %eax,-0x18(%rbp)  */
                                 hash = hash ^ 0xEDB88320;
+                        }
+       //  17.98 │92:   sarb   -0x19(%rbp)
                         c >>= 1;
                 }
         }
@@ -336,7 +353,7 @@ int test_all_hash_funcs (const char *input_file_name)
 
                 for (size_t n = 0; n < hashtable.capacity; n++)
                         list_dtor(hashtable.lists + n);
-                // printf("Tested hash function number %d\n", i);
+                printf("Tested hash function number %d\n", i);
         }
 
         fwrite(buf, sizeof(char), buf_size, output);

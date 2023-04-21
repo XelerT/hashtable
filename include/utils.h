@@ -8,6 +8,8 @@ const int DEFAULT_N_TABLS =  4;
 
 const int HASHTABLE_SIZE  = 32;
 
+const int m256_BYTE_CAPACITY   = 32;
+
 struct graph_node_atr_t {
         const char *shape     = "rectangle";
         const char *style     =   "rounded";

@@ -38,12 +38,17 @@ CFLAGS= -Wshadow    						\
 	-D_DEBUG 						\
 	-D_EJUDGE_CLIENT_SIDE
 
+OPTIM_FLAGS = -mavx2
+
+SANITIZE_FLAGS = -lasan -fsanitize=address,leak
+
 TEXT_CFILES  = text.cpp
 LIST_CFILES  = list/list.cpp list/list_dump.cpp
 LOG_CFILES   = log/log.cpp
 UTILS_CFILES = utils.cpp
-HASH_CFILES  = hashtable/hashtable.cpp
+HASH_CFILES  = hashtable/hashtable.cpp hashtable/optimisation.cpp
 
+ASM_FILES = hashtable/crc32
 CFILES = main.cpp $(TEXT_CFILES) $(LIST_CFILES) $(LOG_CFILES) $(UTILS_CFILES) $(HASH_CFILES)
 
 OUTPUT = hash-tables.out
@@ -54,7 +59,15 @@ DOT_FILE_NAME   = list_graph.dot
 
 all:
 	@ clear
-	@ g++ -o $(OUTPUT) $(CFLAGS) $(CFILES) -lasan -fsanitize=address,leak
+	@ nasm -f elf64 -l $(ASM_FILES).lst $(ASM_FILES).s
+	@ g++ $(OPTIM_FLAGS) -o $(OUTPUT) $(CFLAGS) $(CFILES) $(ASM_FILES).o -no-pie
+	@ echo Compiled c-files
+
+.PHONY: sanitize
+sanitize:
+	@ clear
+	  nasm -f elf64 -l $(ASM_FILES).lst $(ASM_FILES).s
+	  g++ $(OPTIM_FLAGS) -o $(OUTPUT) $(CFLAGS) $(CFILES) $(ASM_FILES).o -no-pie $(SANITIZE_FLAGS)
 	@ echo Compiled c-files
 
 .PHONY: def
