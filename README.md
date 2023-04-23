@@ -1,10 +1,10 @@
--# Hashtables
+# Hashtable
 ---
 ### What is it?
 
-A hashtable or hash map is a data structure that implements an associative array. A hashtable uses a hash function to compute an index to put object inside. Simlpy, hashtable is an array of lists. 
+A hashtable or hash map is a data structure that implements an associative array. A hashtable uses a hash function to compute an index to put object inside. Simlpy, hashtable is an array of lists.
 
-![Alt hashtable]( "Hashtable")
+![Alt hashtable]( https://github.com/XelerT/hashtable/blob/main/imgs/Screenshot_20230421_164942.png)
 
 ### What's happening
 1. Load text and parsing it.
@@ -15,7 +15,7 @@ A hashtable or hash map is a data structure that implements an associative array
 
 ## Hash-funcs overview
 	We have 6 hash-functions for comparison:
-	
+
 Func       | Description
 ------------- | -------------
 one        | hash = 1
@@ -33,12 +33,12 @@ crc32      | ...
 ![rol][image5]
 ![crc32][image6]
 
-[image1]: //https://github.com/XelerT/hashtable/blob/main/graphics/one.png/200x200
-[image2]: //https://github.com/XelerT/hashtable/blob/main/graphics/ascii.png/200x200
-[image3]: //https://github.com/XelerT/hashtable/blob/main/graphics/ascii_sum.png/200x200
-[image4]: //https://github.com/XelerT/hashtable/blob/main/graphics/length.png/200x200
-[image5]: //https://github.com/XelerT/hashtable/blob/main/graphics/rol.png/200x200
-[image6]: //https://github.com/XelerT/hashtable/blob/main/graphics/crc32.png/200x200
+[image1]: //https://github.com/XelerT/hashtable/blob/main/graphics/one.png
+[image2]: //https://github.com/XelerT/hashtable/blob/main/graphics/ascii.png
+[image3]: //https://github.com/XelerT/hashtable/blob/main/graphics/ascii_sum.png
+[image4]: //https://github.com/XelerT/hashtable/blob/main/graphics/length.png
+[image5]: //https://github.com/XelerT/hashtable/blob/main/graphics/rol.png
+[image6]: //https://github.com/XelerT/hashtable/blob/main/graphics/crc32.png
 
 After analizing graphs, we can say that ascii_sum, rol, crc32 can be used as hash-functions.
 
@@ -48,24 +48,25 @@ After analizing graphs, we can say that ascii_sum, rol, crc32 can be used as has
 ## Optimisation
 ---
 <pre>
-		In this part of project <b>crc32</b> was chosen as hash function.
-        
-    	As data base was chosen <b>Atlas Shrugged</b>(~17 000 unique words), as search data used file with words from text and words that do not meet in it, total number of words to search is 570391(one full text and a little bit more) and 67 isn't in text.
+In this part of project <b>crc32</b> was chosen as hash function.
+
+As data base was chosen <b>Atlas Shrugged</b>(~17 000 unique words), as search data used file with words from text and words that do not meet in it,
+total number of words to search is 570391(one full text and a little bit more) and 67 isn't in text.
 
 </pre>
 
 
 ### General performance
 
-<pre> 
-          1,437.49 msec task-clock:u                     #    0.999 CPUs utilized             
-                 0      context-switches:u               #    0.000 /sec                      
-                 0      cpu-migrations:u                 #    0.000 /sec                      
-             4,857      page-faults:u                    #    3.379 K/sec                     
-     4,875,969,738      cycles:u                         #    3.392 GHz                       
-     5,638,967,597      instructions:u                   #    1.16  insn per cycle            
-       941,165,771      branches:u                       #  654.730 M/sec                     
-        41,925,551      branch-misses:u                  #    4.45% of all branches           
+<pre>
+          1,437.49 msec task-clock:u                     #    0.999 CPUs utilized
+                 0      context-switches:u               #    0.000 /sec
+                 0      cpu-migrations:u                 #    0.000 /sec
+             4,857      page-faults:u                    #    3.379 K/sec
+     4,875,969,738      cycles:u                         #    3.392 GHz
+     5,638,967,597      instructions:u                   #    1.16  insn per cycle
+       941,165,771      branches:u                       #  654.730 M/sec
+        41,925,551      branch-misses:u                  #    4.45% of all branches
 
        1.438353766 seconds time elapsed
 
@@ -84,12 +85,12 @@ Main time-consuming functions:
 
 <pre>
 +   68.73%    31.14%  hash-tables.out  hash-tables.out       [.] find_word_in_list
-+   22.71%    22.71%  hash-tables.out  hash-tables.out       [.] get_crc32_hash                                
++   22.71%    22.71%  hash-tables.out  hash-tables.out       [.] get_crc32_hash
 </pre>
 
 ## Recursion and strcmp
 
-We started our optimisation from get_word_in_list, as the main time consuming function. Main time expenses is recursive way of checking list's element and, as supposed, strcmp.  
+We started our optimisation from get_word_in_list, as the main time consuming function. Main time expenses is recursive way of checking list's element and, as supposed, strcmp.
 
 ```C
 bool find_word_in_list (list_t *list, word_t *word, size_t position)
@@ -99,20 +100,20 @@ bool find_word_in_list (list_t *list, word_t *word, size_t position)
 
         if (list->size == 0)
                 return false;
-                
-/*       │ 89:   mov   -0x10(%rbp),%rax                        
-         │       mov   (%rax),%rcx                                                                                    
-         │       mov   -0x8(%rbp),%rax                                                                               
-    3.67 │       mov   (%rax),%rsi                                                                                       0.05 │       mov   -0x18(%rbp),%rdx                                                                                
-         │       mov   %rdx,%rax                                                                                      
-         │       add   %rax,%rax                                                                                      
-    3.52 │       add   %rdx,%rax                                                                                      
-         │       shl   $0x3,%rax                                                                                      
-         │       add   %rsi,%rax                                                                                      
-    3.50 │       mov   (%rax),%rax                                                                                    
-   22.97 │       mov   (%rax),%rax                                                                                    
-    0.13 │       mov   %rcx,%rsi                                                                                      
-         │       mov   %rax,%rdi                                                                                      
+
+/*       │ 89:   mov   -0x10(%rbp),%rax
+         │       mov   (%rax),%rcx
+         │       mov   -0x8(%rbp),%rax
+    3.67 │       mov   (%rax),%rsi                                                                                       0.05 │       mov   -0x18(%rbp),%rdx
+         │       mov   %rdx,%rax
+         │       add   %rax,%rax
+    3.52 │       add   %rdx,%rax
+         │       shl   $0x3,%rax
+         │       add   %rsi,%rax
+    3.50 │       mov   (%rax),%rax
+   22.97 │       mov   (%rax),%rax
+    0.13 │       mov   %rcx,%rsi
+         │       mov   %rax,%rdi
     3.72 │     → call  strcmp@plt 			*/
         if (!strcmp(((word_t*) list->data[position].data)->ptr, word->ptr)) {
                 return true;
@@ -129,14 +130,14 @@ bool find_word_in_list (list_t *list, word_t *word, size_t position)
 Firstly we change recursion using cycle. Stats:
 
 <pre>
-          1,152.29 msec task-clock:u                     #    0.999 CPUs utilized             
-                 0      context-switches:u               #    0.000 /sec                      
-                 0      cpu-migrations:u                 #    0.000 /sec                      
-             4,849      page-faults:u                    #    4.208 K/sec                     
-     3,889,472,819      cycles:u                         #    3.375 GHz                       
-     4,289,687,992      instructions:u                   #    1.10  insn per cycle            
-       656,879,636      branches:u                       #  570.066 M/sec                     
-        44,691,703      branch-misses:u                  #    6.80% of all branches           
+          1,152.29 msec task-clock:u                     #    0.999 CPUs utilized
+                 0      context-switches:u               #    0.000 /sec
+                 0      cpu-migrations:u                 #    0.000 /sec
+             4,849      page-faults:u                    #    4.208 K/sec
+     3,889,472,819      cycles:u                         #    3.375 GHz
+     4,289,687,992      instructions:u                   #    1.10  insn per cycle
+       656,879,636      branches:u                       #  570.066 M/sec
+        44,691,703      branch-misses:u                  #    6.80% of all branches
 
        1.152952114 seconds time elapsed
 
@@ -151,17 +152,17 @@ t1 | t2 | t3 | t4 | t5 | \<t\>
 
 We get 26% improvement in time but branch-misprediction percentage increased by 2.35%.
 
-Now we changed strcmp. We will compare words which contain their length and pointer on string. For comparing strings we will use avx intrinsics. We didn't alligne strings before searching tests because of huge memory consumptions (If we had, we would have better performance boost in these optimisation [Next part](#Prealigned words)).
+Now we changed strcmp. We will compare words which contain their length and pointer on string. For comparing strings we will use avx intrinsics. We didn't alligne strings before searching tests because of huge memory consumptions (If we had, we would have better performance boost in these optimisation [See next part](#prealigned-words)).
 
 ```C
-          1,122.24 msec task-clock:u                     #    0.999 CPUs utilized             
-                 0      context-switches:u               #    0.000 /sec                      
-                 0      cpu-migrations:u                 #    0.000 /sec                      
-             4,849      page-faults:u                    #    4.321 K/sec                     
-     3,802,485,316      cycles:u                         #    3.388 GHz                       
-     4,289,910,134      instructions:u                   #    1.13  insn per cycle            
-       656,916,654      branches:u                       #  585.364 M/sec                     
-        42,154,230      branch-misses:u                  #    6.42% of all branches           
+          1,122.24 msec task-clock:u                     #    0.999 CPUs utilized
+                 0      context-switches:u               #    0.000 /sec
+                 0      cpu-migrations:u                 #    0.000 /sec
+             4,849      page-faults:u                    #    4.321 K/sec
+     3,802,485,316      cycles:u                         #    3.388 GHz
+     4,289,910,134      instructions:u                   #    1.13  insn per cycle
+       656,916,654      branches:u                       #  585.364 M/sec
+        42,154,230      branch-misses:u                  #    6.42% of all branches
 
        1.122860639 seconds time elapsed
 
@@ -193,23 +194,23 @@ size_t get_crc32_hash (word_t *word)
         int hash = 0xFFFFFFFF;
         int bit = 0;
 
-     /* 3.72 │      addq   $0x1,-0x8(%rbp)                                                                                             
+     /* 3.72 │      addq   $0x1,-0x8(%rbp)
         7.14 │9a:   cmpq   $0x7,-0x8(%rbp)  */
         for (size_t i = 0; i < word->length; i++) {
                 char c = word->ptr[i];
                 for (size_t j = 0; j < 8; j++) {
-        /*   3.83 │71:  movsbl -0x19(%rbp),%eax                                                                                    
-             3.74 │     xor    -0x18(%rbp),%eax                                                                                               
-             2.13 │     and    $0x1,%eax                                                                                                     
+        /*   3.83 │71:  movsbl -0x19(%rbp),%eax
+             3.74 │     xor    -0x18(%rbp),%eax
+             2.13 │     and    $0x1,%eax
              5.85 │     mov    %eax,-0x14(%rbp)  */
                         bit = (c ^ hash) & 1;
                         hash >>= 1;
 
        //  13.13 │      cmpl   $0x0,-0x14(%rbp)
                         if (bit) {
-                /*  3.83 │71:   movsbl -0x19(%rbp),%eax                                                                                               
-                    3.74 │      xor    -0x18(%rbp),%eax                                                                                               
-                    2.13 │      and    $0x1,%eax                                                                                                      
+                /*  3.83 │71:   movsbl -0x19(%rbp),%eax
+                    3.74 │      xor    -0x18(%rbp),%eax
+                    2.13 │      and    $0x1,%eax
                     5.85 │      mov    %eax,-0x14(%rbp)   */
                                 hash = hash ^ 0xEDB88320;
                         }
@@ -241,14 +242,14 @@ asm_get_crc32_hash:
 Result of this optimisation is pretty good. Time performance boost is 32% and mispredicted branches reduced by 4.15%.
 
 <pre>
-            860.96 msec task-clock:u                     #    0.993 CPUs utilized             
-                 0      context-switches:u               #    0.000 /sec                      
-                 0      cpu-migrations:u                 #    0.000 /sec                      
-             4,854      page-faults:u                    #    5.638 K/sec                     
-     2,890,718,505      cycles:u                         #    3.358 GHz                       
-     4,750,701,831      instructions:u                   #    1.64  insn per cycle            
-       723,546,512      branches:u                       #  840.395 M/sec                     
-        16,406,949      branch-misses:u                  #    2.27% of all branches           
+            860.96 msec task-clock:u                     #    0.993 CPUs utilized
+                 0      context-switches:u               #    0.000 /sec
+                 0      cpu-migrations:u                 #    0.000 /sec
+             4,854      page-faults:u                    #    5.638 K/sec
+     2,890,718,505      cycles:u                         #    3.358 GHz
+     4,750,701,831      instructions:u                   #    1.64  insn per cycle
+       723,546,512      branches:u                       #  840.395 M/sec
+        16,406,949      branch-misses:u                  #    2.27% of all branches
 
        0.867078287 seconds time elapsed
 
@@ -301,14 +302,14 @@ int find_elem_inlined_asm (hashtable_t *hashtable, word_t *word)
 ```
 
 <pre>
-            846.58 msec task-clock:u                     #    0.992 CPUs utilized             
-                 0      context-switches:u               #    0.000 /sec                      
-                 0      cpu-migrations:u                 #    0.000 /sec                      
-             4,859      page-faults:u                    #    5.740 K/sec                     
-     2,843,655,572      cycles:u                         #    3.359 GHz                       
-     4,748,420,225      instructions:u                   #    1.67  insn per cycle            
-       722,405,686      branches:u                       #  853.326 M/sec                     
-        16,385,370      branch-misses:u                  #    2.27% of all branches 
+            846.58 msec task-clock:u                     #    0.992 CPUs utilized
+                 0      context-switches:u               #    0.000 /sec
+                 0      cpu-migrations:u                 #    0.000 /sec
+             4,859      page-faults:u                    #    5.740 K/sec
+     2,843,655,572      cycles:u                         #    3.359 GHz
+     4,748,420,225      instructions:u                   #    1.67  insn per cycle
+       722,405,686      branches:u                       #  853.326 M/sec
+        16,385,370      branch-misses:u                  #    2.27% of all branches
 </pre>
 
 t1 | t2 | t3 | t4 | t5 | \<t\>
@@ -320,21 +321,21 @@ Time performance boost is 1%, that can be just error, therefore we stopped optim
 
 # Prealigned words
 
-If we want to have maximum in searching functions we need to spend more memory to aligne words and compare them using avx registers. 
+If we want to have maximum in searching functions we need to spend more memory to aligne words and compare them using avx registers.
 
 This part breifly repeats stats from previous part of work but with aligned words before searching them in hashtable.
 
 ## Gereral performance
 
 <pre>
-          1,592.77 msec task-clock:u                     #    0.989 CPUs utilized             
-                 0      context-switches:u               #    0.000 /sec                      
-                 0      cpu-migrations:u                 #    0.000 /sec                      
-            13,769      page-faults:u                    #    8.645 K/sec                     
-     5,261,223,084      cycles:u                         #    3.303 GHz                       
-     5,700,922,097      instructions:u                   #    1.08  insn per cycle            
-       951,646,153      branches:u                       #  597.478 M/sec                     
-        44,349,616      branch-misses:u                  #    4.66% of all branches           
+          1,592.77 msec task-clock:u                     #    0.989 CPUs utilized
+                 0      context-switches:u               #    0.000 /sec
+                 0      cpu-migrations:u                 #    0.000 /sec
+            13,769      page-faults:u                    #    8.645 K/sec
+     5,261,223,084      cycles:u                         #    3.303 GHz
+     5,700,922,097      instructions:u                   #    1.08  insn per cycle
+       951,646,153      branches:u                       #  597.478 M/sec
+        44,349,616      branch-misses:u                  #    4.66% of all branches
 
        1.610622468 seconds time elapsed
 
@@ -356,14 +357,14 @@ Stats after recursion deletation:
 
 <pre>
 
-          1,250.74 msec task-clock:u                     #    1.000 CPUs utilized             
-                 0      context-switches:u               #    0.000 /sec                      
-                 0      cpu-migrations:u                 #    0.000 /sec                      
-            13,759      page-faults:u                    #   11.001 K/sec                     
-     4,191,783,655      cycles:u                         #    3.351 GHz                       
-     4,352,014,349      instructions:u                   #    1.04  insn per cycle            
-       667,392,685      branches:u                       #  533.599 M/sec                     
-        47,571,859      branch-misses:u                  #    7.13% of all branches           
+          1,250.74 msec task-clock:u                     #    1.000 CPUs utilized
+                 0      context-switches:u               #    0.000 /sec
+                 0      cpu-migrations:u                 #    0.000 /sec
+            13,759      page-faults:u                    #   11.001 K/sec
+     4,191,783,655      cycles:u                         #    3.351 GHz
+     4,352,014,349      instructions:u                   #    1.04  insn per cycle
+       667,392,685      branches:u                       #  533.599 M/sec
+        47,571,859      branch-misses:u                  #    7.13% of all branches
 
        1.251244188 seconds time elapsed
 
@@ -410,14 +411,14 @@ Stats after using words compare function:
 
 <pre>
 
-          1,153.14 msec task-clock:u                     #    0.992 CPUs utilized             
-                 0      context-switches:u               #    0.000 /sec                      
-                 0      cpu-migrations:u                 #    0.000 /sec                      
-            13,767      page-faults:u                    #   11.939 K/sec                     
-     3,770,674,800      cycles:u                         #    3.270 GHz                       
-     4,682,064,324      instructions:u                   #    1.24  insn per cycle            
-       670,906,500      branches:u                       #  581.807 M/sec                     
-        34,344,398      branch-misses:u                  #    5.12% of all branches           
+          1,153.14 msec task-clock:u                     #    0.992 CPUs utilized
+                 0      context-switches:u               #    0.000 /sec
+                 0      cpu-migrations:u                 #    0.000 /sec
+            13,767      page-faults:u                    #   11.939 K/sec
+     3,770,674,800      cycles:u                         #    3.270 GHz
+     4,682,064,324      instructions:u                   #    1.24  insn per cycle
+       670,906,500      branches:u                       #  581.807 M/sec
+        34,344,398      branch-misses:u                  #    5.12% of all branches
 
        1.162184955 seconds time elapsed
 
@@ -438,14 +439,14 @@ Time performance boost is 11.6% and percentage of mispredicted branches reduced 
 Stats after using crc32 in assembler:
 
 <pre>
-            815.28 msec task-clock:u                     #    0.999 CPUs utilized             
-                 0      context-switches:u               #    0.000 /sec                      
-                 0      cpu-migrations:u                 #    0.000 /sec                      
-            13,766      page-faults:u                    #   16.885 K/sec                     
-     2,686,216,621      cycles:u                         #    3.295 GHz                       
-     4,019,561,542      instructions:u                   #    1.50  insn per cycle            
-       563,193,526      branches:u                       #  690.797 M/sec                     
-        15,696,744      branch-misses:u                  #    2.79% of all branches           
+            815.28 msec task-clock:u                     #    0.999 CPUs utilized
+                 0      context-switches:u               #    0.000 /sec
+                 0      cpu-migrations:u                 #    0.000 /sec
+            13,766      page-faults:u                    #   16.885 K/sec
+     2,686,216,621      cycles:u                         #    3.295 GHz
+     4,019,561,542      instructions:u                   #    1.50  insn per cycle
+       563,193,526      branches:u                       #  690.797 M/sec
+        15,696,744      branch-misses:u                  #    2.79% of all branches
 
        0.815870937 seconds time elapsed
 
@@ -467,14 +468,14 @@ Stats after inlining:
 
 <pre>
 
-            808.14 msec task-clock:u                     #    0.999 CPUs utilized             
-                 0      context-switches:u               #    0.000 /sec                      
-                 0      cpu-migrations:u                 #    0.000 /sec                      
-            13,766      page-faults:u                    #   17.034 K/sec                     
-     2,660,979,925      cycles:u                         #    3.293 GHz                       
-     4,017,279,976      instructions:u                   #    1.51  insn per cycle            
-       562,052,742      branches:u                       #  695.493 M/sec                     
-        15,738,757      branch-misses:u                  #    2.80% of all branches           
+            808.14 msec task-clock:u                     #    0.999 CPUs utilized
+                 0      context-switches:u               #    0.000 /sec
+                 0      cpu-migrations:u                 #    0.000 /sec
+            13,766      page-faults:u                    #   17.034 K/sec
+     2,660,979,925      cycles:u                         #    3.293 GHz
+     4,017,279,976      instructions:u                   #    1.51  insn per cycle
+       562,052,742      branches:u                       #  695.493 M/sec
+        15,738,757      branch-misses:u                  #    2.80% of all branches
 
        0.808581397 seconds time elapsed
 
