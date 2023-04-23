@@ -25,20 +25,7 @@ length     | hash = strlen(word)
 rol        | for i in strlen(word) hash = rol(hash) ^ word[i]
 crc32      | ...
 
-
-![one][image1]
-![Картинка][image2]
-![Картинка][image3]
-![Картинка][image4]
-![rol][image5]
-![crc32][image6]
-
-[image1]: //https://github.com/XelerT/hashtable/blob/main/graphics/one.png
-[image2]: //https://github.com/XelerT/hashtable/blob/main/graphics/ascii.png
-[image3]: //https://github.com/XelerT/hashtable/blob/main/graphics/ascii_sum.png
-[image4]: //https://github.com/XelerT/hashtable/blob/main/graphics/length.png
-[image5]: //https://github.com/XelerT/hashtable/blob/main/graphics/rol.png
-[image6]: //https://github.com/XelerT/hashtable/blob/main/graphics/crc32.png
+![Alt graphs](https://github.com/XelerT/hashtable/blob/main/imgs/graphs.png)
 
 After analizing graphs, we can say that ascii_sum, rol, crc32 can be used as hash-functions.
 
@@ -50,8 +37,8 @@ After analizing graphs, we can say that ascii_sum, rol, crc32 can be used as has
 <pre>
 In this part of project <b>crc32</b> was chosen as hash function.
 
-As data base was chosen <b>Atlas Shrugged</b>(~17 000 unique words), as search data used file with words from text and words that do not meet in it,
-total number of words to search is 570391(one full text and a little bit more) and 67 isn't in text.
+As data base was chosen <b>Atlas Shrugged</b> (~17 000 unique words), as search data used file with words from text and words that <br />
+do not meet in it, total number of words to search is 570391 (one full text and a little bit more) and 67 isn't in text.
 
 </pre>
 
