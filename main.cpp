@@ -21,6 +21,10 @@ int main (int argc, char *argv[])
         delete_punctuations(&text);
         divide_text_on_words(&text);
 
+#ifdef PRE_ALIGNED_WORDS
+        aligne_words(&text);
+#endif /*PRE_ALIGNED_WORDS*/
+
         char hash_mode = 0;
         if (argc == 1)
                 hash_mode = 0;
@@ -48,7 +52,11 @@ int main (int argc, char *argv[])
         delete_punctuations(&text_words2find);
         divide_text_on_words(&text_words2find);
 
-        printf("Found %ld words\n", find_words_crc32(&hashtable, text_words2find.words, text_words2find.n_words));
+#ifdef PRE_ALIGNED_WORDS
+        aligne_words(&text_words2find);
+#endif /*PRE_ALIGNED_WORDS*/
+
+        printf("Found %ld words from %ld\n", find_words_crc32(&hashtable, text_words2find.words, text_words2find.n_words), text_words2find.n_words);
 
         text_dtor(&text);
         text_dtor(&text_words2find);

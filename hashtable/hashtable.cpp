@@ -88,7 +88,11 @@ int hash_words (text_t *text, hashtable_t *hashtable, char hash_mode)
                 fill_words_hashtable(text, hashtable, get_my_hash);
                 break;
         default:
+#ifdef  ASM_CRC32_OPTIMISATION
                 fill_words_hashtable(text, hashtable, asm_get_crc32_hash);
+#else
+                fill_words_hashtable(text, hashtable, get_crc32_hash);
+#endif /*ASM_CRC32_OPTIMISATION*/
         }
         return 0;
 }
@@ -101,8 +105,22 @@ size_t find_words_crc32 (hashtable_t *hashtable, word_t *words, size_t n_words)
         size_t found_n_words = 0;
 
         for (size_t i = 0; i < n_words; i++) {
+
+#ifdef ASM_CRC32_OPTIMISATION
+
+#ifdef INL_ASM_CRC32_OPTIMISATION
+
+                if (!find_elem_inlined_asm(hashtable, words + i))
+                        found_n_words++;
+#else
                 if (!find_elem(hashtable, words + i, asm_get_crc32_hash))
                         found_n_words++;
+#endif /*INL_ASM_CRC32_OPTIMISATION*/
+
+#else
+                if (!find_elem(hashtable, words + i, get_crc32_hash))
+                        found_n_words++;
+#endif /*INL_ASM_CRC32_OPTIMISATION*/
         }
 
         return found_n_words;
@@ -115,10 +133,8 @@ int find_elem (hashtable_t *hashtable, word_t *word, hash_func_t get_word_hash)
 
         size_t hash = get_word_hash(word);
 
-        if (hash >= hashtable->capacity) {
-                log(1, "HASH IS TOO BIG.");
+        if (hash >= hashtable->capacity)
                 hash = hash % hashtable->capacity;
-        }
 
         if (!find_word_in_list(hashtable->lists + hash, word, 1))
                 return NO_ELEMENT;
@@ -133,20 +149,33 @@ bool find_word_in_list (list_t *list, word_t *word, size_t position)
 
         if (list->size == 0)
                 return false;
-// $
-        /*cmpl  $0x0,-0x4(%rbp)*/
-        //
-        //avx_wordcmp((word_t*) list->data[position].data, word)
+
+#ifdef NO_OPTIMISATION
+
         if (!strcmp(((word_t*) list->data[position].data)->ptr, word->ptr)) {
                 return true;
         } else if (list->data[position].next != 0) {
                 return find_word_in_list(list, word, list->data[position].next);
         }
-        // while (list->data[position].next) {
-        //         if (avx_wordcmp((word_t*) list->data[position].data, word))
-        //                 return true;
-        //         position = list->data[position].next;
-        // }
+#endif /*NO_OPTIMISATION*/
+
+#ifdef CYCLE_OPTIMISATION
+
+        while (list->data[position].next) {
+                if (!strcmp(((word_t*) list->data[position].data)->ptr, word->ptr))
+                        return true;
+                position++;
+        }
+#endif /*CYCLE_OPTIMISATION*/
+
+#ifdef AVX_OPTIMISATION
+
+        while (list->data[position].next) {
+                if (avx_wordcmp((word_t*) list->data[position].data, word))
+                        return true;
+                position = list->data[position].next;
+        }
+#endif /*AVX_OPTIMISATION*/
 
         return false;
 }
@@ -170,14 +199,12 @@ int fill_words_hashtable (text_t *text, hashtable_t *hashtable, hash_func_t get_
         assert(hashtable);
 
         size_t hash = 0;
-        int again = 0;
 
         for (size_t i = 0; i < text->n_words; i++) {
                 hash = get_word_hash(text->words + i);
                 if (hash >= hashtable->capacity)
                         hash = hash % hashtable->capacity;
                 if (find_word_in_list(hashtable->lists + hash, text->words + i, 1)) {
-                        again++;
                         continue;
                 }
                 word_t* temp2 = (text->words + i);
@@ -263,24 +290,27 @@ size_t get_crc32_hash (word_t *word)
         int hash = 0xFFFFFFFF;
         int bit = 0;
 
+     /* 3.72 │      addq   $0x1,-0x8(%rbp)                                                                                                ▒
+        7.14 │9a:   cmpq   $0x7,-0x8(%rbp)  */
         for (size_t i = 0; i < word->length; i++) {
                 char c = word->ptr[i];
                 for (size_t j = 0; j < 8; j++) {
-        /*  3.18 │71:   movsbl -0x19(%rbp),%eax                                                                                               ▒
-            3.08 │      xor    -0x18(%rbp),%eax                                                                                               ▒
-            2.86 │      and    $0x1,%eax                                                                                                      ▒
-            6.47 │      mov    %eax,-0x14(%rbp) */
+        /*   3.83 │71:  movsbl -0x19(%rbp),%eax                                                                                               ▒
+             3.74 │     xor    -0x18(%rbp),%eax                                                                                               ▒
+             2.13 │     and    $0x1,%eax                                                                                                      ▒
+             5.85 │     mov    %eax,-0x14(%rbp)  */
                         bit = (c ^ hash) & 1;
                         hash >>= 1;
 
-       //  12.15 │      cmpl   $0x0,-0x14(%rbp)
+       //  13.13 │      cmpl   $0x0,-0x14(%rbp)
                         if (bit) {
-                /* 17.78 │      mov    -0x18(%rbp),%eax                                                                                               ▒
-                    1.26 │      xor    $0xedb88320,%eax                                                                                               ▒
-                    2.23 │      mov    %eax,-0x18(%rbp)  */
+                /*  3.83 │71:   movsbl -0x19(%rbp),%eax                                                                                               ▒
+                    3.74 │      xor    -0x18(%rbp),%eax                                                                                               ▒
+                    2.13 │      and    $0x1,%eax                                                                                                      ▒
+                    5.85 │      mov    %eax,-0x14(%rbp)   */
                                 hash = hash ^ 0xEDB88320;
                         }
-       //  17.98 │92:   sarb   -0x19(%rbp)
+       //  20.09 │92:   sarb   -0x19(%rbp)
                         c >>= 1;
                 }
         }

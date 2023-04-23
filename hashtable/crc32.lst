@@ -4,16 +4,17 @@
      4                                  
      5                                  ;===============================================
      6                                  ; Entry: rdi - pointer on the word_t
-     7                                  
-     8                                  asm_get_crc32_hash:
-     9                                  
-    10 00000000 B8FFFFFFFF                      mov rax, 0xFFFFFFFF
-    11 00000005 488B4F08                        mov rcx, qword [rdi + 8]
-    12 00000009 488B37                          mov rsi, qword [rdi]
-    13                                  .hash:
-    14 0000000C F20F38F006                      crc32 eax, byte [rsi]
-    15 00000011 4883C601                        add rsi, 0x1
-    16 00000015 E2F5                            loop .hash
-    17                                  
-    18 00000017 C3                              ret
-    19                                  
+     7                                  ;===============================================
+     8                                  
+     9                                  asm_get_crc32_hash:
+    10                                  
+    11 00000000 B8FFFFFFFF                      mov rax, 0xFFFFFFFF
+    12 00000005 488B4F08                        mov rcx, qword [rdi + 8]
+    13 00000009 488B37                          mov rsi, qword [rdi]
+    14                                  .hash:
+    15 0000000C F20F38F006                      crc32 eax, byte [rsi]
+    16 00000011 48FFC6                          inc rsi
+    17 00000014 E2F6                            loop .hash
+    18                                  
+    19 00000016 C3                              ret
+    20                                  

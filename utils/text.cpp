@@ -3,8 +3,9 @@
 #include <sys/stat.h>
 #include <assert.h>
 #include <ctype.h>
+#include <string.h>
 
-#include "include/text.h"
+#include "../include/text.h"
 
 
 int get_text (FILE *input, text_t *text, const char *file_name)
@@ -134,6 +135,28 @@ void divide_text_on_words (text_t *text)
         }
 }
 
+int aligne_words (text_t *text)
+{
+        assert(text);
+
+        word_t *words = text->words;
+        char *aligned_words = (char*) calloc(text->n_words * m256_BYTE_CAPACITY + 1, sizeof(char));
+
+        if (!aligned_words) {
+                log(1, "NULL CALLOC.");
+                return NULL_CALLOC;
+        }
+
+        for (size_t i = 0, j = 0; i < text->n_words; i++, j += m256_BYTE_CAPACITY) {
+                memcpy(aligned_words + j, words[i].ptr, words[i].length);
+                words[i].ptr = aligned_words + j;
+        }
+
+        text->aligned_words = aligned_words;
+
+        return 0;
+}
+
 void text_dtor (text_t *text)
 {
         assert(text);
@@ -149,5 +172,9 @@ void text_dtor (text_t *text)
         if (text->buf) {
                 free(text->buf);
                 text->buf  = nullptr;
+        }
+        if (text->aligned_words) {
+                free(text->aligned_words);
+                text->aligned_words = nullptr;
         }
 }

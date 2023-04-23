@@ -4,7 +4,7 @@
 #include "../include/text.h"
 #include "../list/list.h"
 
-bool minus_opt_find_word_in_list (list_t *list, word_t *word, size_t position);
 bool avx_wordcmp (word_t *word1, word_t *word2);
+int find_elem_inlined_asm (hashtable_t *hashtable, word_t *word);
 
 #endif /*OPTIMISATION_H*/

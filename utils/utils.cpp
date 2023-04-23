@@ -2,7 +2,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include "include/config.h"
+#include "../include/config.h"
 
 void my_ror (void *original_val, size_t sizeof_val, size_t max_iter)
 {

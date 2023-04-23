@@ -16,12 +16,13 @@ struct line_t
 };
 
 struct text_t {
-        size_t n_words = 0;
-        size_t n_lines = 0;
-        size_t n_chars = 0;
-        char *buf      = nullptr;
-        line_t *lines  = nullptr;
-        word_t *words  = nullptr;
+        size_t n_words      =       0;
+        size_t n_lines      =       0;
+        size_t n_chars      =       0;
+        char *buf           = nullptr;
+        line_t *lines       = nullptr;
+        word_t *words       = nullptr;
+        char *aligned_words = nullptr;
 };
 
 const int MAX_LINE_LENGTH = 512;
@@ -43,5 +44,7 @@ void divide_text_on_lines (text_t *text);
 void divide_text_on_words (text_t *text);
 
 char *skip_tabs           (char   *line);
+
+int aligne_words (text_t *text);
 
 #endif /*TEXT_H*/

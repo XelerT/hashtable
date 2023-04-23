@@ -42,10 +42,10 @@ OPTIM_FLAGS = -mavx2
 
 SANITIZE_FLAGS = -lasan -fsanitize=address,leak
 
-TEXT_CFILES  = text.cpp
+TEXT_CFILES  = utils/text.cpp
 LIST_CFILES  = list/list.cpp list/list_dump.cpp
 LOG_CFILES   = log/log.cpp
-UTILS_CFILES = utils.cpp
+UTILS_CFILES = utils/utils.cpp
 HASH_CFILES  = hashtable/hashtable.cpp hashtable/optimisation.cpp
 
 ASM_FILES = hashtable/crc32
@@ -58,9 +58,9 @@ IMG_FORMAT      = png
 DOT_FILE_NAME   = list_graph.dot
 
 all:
-	@ clear
+	# @ clear
 	@ nasm -f elf64 -l $(ASM_FILES).lst $(ASM_FILES).s
-	@ g++ $(OPTIM_FLAGS) -o $(OUTPUT) $(CFLAGS) $(CFILES) $(ASM_FILES).o -no-pie
+	@ g++ $(OPTIM_FLAGS) -masm=intel -o $(OUTPUT) $(CFLAGS) $(CFILES) $(ASM_FILES).o -no-pie
 	@ echo Compiled c-files
 
 .PHONY: sanitize
