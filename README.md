@@ -17,18 +17,20 @@ A hashtable or hash map is a data structure that implements an associative array
 
 We have 6 hash-functions for comparison:
 
-Func       | Description
-------------- | -------------
-one        | hash = 1
-ascii      | hash = word[0]
-ascii_sum  | hash = word[0] + ... + word[n]
-length     | hash = strlen(word)
-rol        | for i in strlen(word) hash = rol(hash) ^ word[i]
-crc32      | ...
+Number |    Func    | Description
+-------|----------- | -------------
+ 1 | one            | hash = 1
+ 2 | ascii          | hash = word[0]
+ 3 | length         | hash = strlen(word)
+ 4 | ascii_sum      | hash = word[0] + ... + word[n]
+ 5 | rol            | for i in strlen(word) hash = rol(hash) ^ word[i]
+ 6 | crc32          | ...
+
+Element distribution for each function is on the graph (y - number of elements in list, x - list number):
 
 ![Alt graphs](https://github.com/XelerT/hashtable/blob/main/imgs/graphs.png)
 
-After analizing graphs, we can say that ascii_sum, rol, crc32 can be used as hash-functions.
+After analyzing graphs, we can say that ascii_sum, rol, crc32 can be used as hash-functions.
 
 >**Note:** Tests were done using hashtable size equals 32.
 
