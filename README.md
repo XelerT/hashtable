@@ -14,7 +14,8 @@ A hashtable or hash map is a data structure that implements an associative array
 4. If words has the same hash they are pasted on next position in list.
 
 ## Hash-funcs overview
-	We have 6 hash-functions for comparison:
+
+We have 6 hash-functions for comparison:
 
 Func       | Description
 ------------- | -------------
@@ -41,28 +42,19 @@ do not meet in it, total number of words to search is 570391 (one full text and 
 
 ### General performance
 
-<pre>
-          1,437.49 msec task-clock:u                     #    0.999 CPUs utilized
-                 0      context-switches:u               #    0.000 /sec
-                 0      cpu-migrations:u                 #    0.000 /sec
-             4,857      page-faults:u                    #    3.379 K/sec
-     4,875,969,738      cycles:u                         #    3.392 GHz
-     5,638,967,597      instructions:u                   #    1.16  insn per cycle
-       941,165,771      branches:u                       #  654.730 M/sec
-        41,925,551      branch-misses:u                  #    4.45% of all branches
-
-       1.438353766 seconds time elapsed
-
-       1.426456000 seconds user
-       0.009982000 seconds sys
-
-</pre>
-
 As main performance argument we will choose execution time of program. Therefore we will test performance 5 times and then will get average execution time.
 
-t1 | t2 | t3 | t4 | t5 | \<t\>
----|----|----|----|----|------
-1.446 | 1.455 | 1.437 | 1.439 | 1.426 | 1.441
+Without any optimisations we have this results:
+
+<pre>
+    23,818,569,551      cycles:u                                                                ( +- 14.13% )
+    28,194,819,193      instructions:u                   #    1.97  insn per cycle              ( +- 14.14% )
+     1,608,273,691      cache-references:u                                                      ( +- 14.07% )
+        12,774,498      cache-misses:u                   #    1.321 % of all cache refs         ( +- 12.52% )
+       164,321,014      bus-cycles:u                                                            ( +- 14.10% )
+
+           1.39981 +- 0.00465 seconds time elapsed  ( +-  0.33% )
+</pre>
 
 Main time-consuming functions:
 
@@ -133,52 +125,61 @@ bool find_word_in_list (list_t *list, word_t *word, size_t position)
  Stats:
 
 <pre>
-          1,152.29 msec task-clock:u                     #    0.999 CPUs utilized
-                 0      context-switches:u               #    0.000 /sec
-                 0      cpu-migrations:u                 #    0.000 /sec
-             4,849      page-faults:u                    #    4.208 K/sec
-     3,889,472,819      cycles:u                         #    3.375 GHz
-     4,289,687,992      instructions:u                   #    1.10  insn per cycle
-       656,879,636      branches:u                       #  570.066 M/sec
-        44,691,703      branch-misses:u                  #    6.80% of all branches
+    18,927,158,522      cycles:u                                                                ( +- 14.14% )
+    21,448,424,297      instructions:u                   #    1.89  insn per cycle              ( +- 14.14% )
+     1,630,926,957      cache-references:u                                                      ( +- 14.15% )
+        10,566,824      cache-misses:u                   #    1.078 % of all cache refs         ( +- 14.12% )
+       130,385,352      bus-cycles:u                                                            ( +- 14.14% )
 
-       1.152952114 seconds time elapsed
-
-       1.141215000 seconds user
-       0.010007000 seconds sys
-
+           1.11165 +- 0.00244 seconds time elapsed  ( +-  0.22% )
 </pre>
 
-t1 | t2 | t3 | t4 | t5 | \<t\>
----|----|----|----|----|------
-1.159 | 1.139 | 1.131 | 1.146 | 1.141 | 1.143
+We get 27% improvement in time and cache-misses percentage decreased by 0.3%.
 
-We get 26% improvement in time but branch-misprediction percentage increased by 2.35%.
+## Strcmp
 
 Now lets change strcmp. We will compare words which contain their length and pointer to string. For comparing strings we will use avx intrinsics. We didn't alligne strings before searching tests [See next part with aligned words](#prealigned-words)).
 
 ```C
-          1,122.24 msec task-clock:u                     #    0.999 CPUs utilized
-                 0      context-switches:u               #    0.000 /sec
-                 0      cpu-migrations:u                 #    0.000 /sec
-             4,849      page-faults:u                    #    4.321 K/sec
-     3,802,485,316      cycles:u                         #    3.388 GHz
-     4,289,910,134      instructions:u                   #    1.13  insn per cycle
-       656,916,654      branches:u                       #  585.364 M/sec
-        42,154,230      branch-misses:u                  #    6.42% of all branches
+bool avx_wordcmp (word_t *word1, word_t *word2)
+{
+        assert(word1);
+        assert(word2);
 
-       1.122860639 seconds time elapsed
+        if (word1->length != word2->length) {
+                return false;
+        }
 
-       1.111512000 seconds user
-       0.009945000 seconds sys
+        char str1[m256_BYTE_CAPACITY] = {'\0'};
+        char str2[m256_BYTE_CAPACITY] = {'\0'};
 
+        memcpy(str1, word1->ptr, word1->length);
+        memcpy(str2, word2->ptr, word2->length);
+
+        __m256i avx_str1 = _mm256_lddqu_si256((__m256i*) str1);
+        __m256i avx_str2 = _mm256_lddqu_si256((__m256i*) str2);
+
+        int next = _mm256_testc_si256(avx_str1, avx_str2);
+        if (next)
+                return true;
+
+        return false;
+}
 ```
-t1 | t2 | t3 | t4 | t5 | \<t\>
----|----|----|----|----|------
-1.112 | 1.100 | 1.114 | 1.116 | 1.114 | 1.111
 
-Inlining function don't have any countable effect. We have performance boost in 3%. Therefore we will optimise next function.
+<pre>
+    19,304,346,210      cycles:u                                                                ( +- 14.17% )
+    27,032,364,822      instructions:u                   #    2.34  insn per cycle              ( +- 14.14% )
+       874,827,515      cache-references:u                                                      ( +- 14.03% )
+         8,750,253      cache-misses:u                   #    1.654 % of all cache refs         ( +- 14.31% )
+       132,969,031      bus-cycles:u                                                            ( +- 14.17% )
 
+           1.13374 +- 0.00337 seconds time elapsed  ( +-  0.30% )
+</pre>
+
+We don't have time performance boost and have worse results in cache-misses. Inlining function also don't have any countable effect. Therefore we will optimise next function.
+
+Results after:
 <pre>
 +   60.23%    18.86%  hash-tables.out  hash-tables.out       [.] find_word_in_list
 +   29.50%    29.50%  hash-tables.out  hash-tables.out       [.] get_crc32_hash
@@ -225,7 +226,7 @@ size_t get_crc32_hash (word_t *word)
 }
 ```
 
-For optimising these function we can use assembly function.
+For optimising this function we can use assembly function.
 
 ```nasm
 
@@ -242,33 +243,21 @@ asm_get_crc32_hash:
         ret
 ```
 
-Result of this optimisation is pretty good. Time performance boost is 32% and mispredicted branches reduced by 4.15%.
+Result of this optimisation is pretty good. Time performance boost is 34% and mispredicted caches increased by 0.4%.
 
 <pre>
-            860.96 msec task-clock:u                     #    0.993 CPUs utilized
-                 0      context-switches:u               #    0.000 /sec
-                 0      cpu-migrations:u                 #    0.000 /sec
-             4,854      page-faults:u                    #    5.638 K/sec
-     2,890,718,505      cycles:u                         #    3.358 GHz
-     4,750,701,831      instructions:u                   #    1.64  insn per cycle
-       723,546,512      branches:u                       #  840.395 M/sec
-        16,406,949      branch-misses:u                  #    2.27% of all branches
+    14,179,968,133      cycles:u                                                                ( +- 14.14% )
+    23,753,497,473      instructions:u                   #    2.80  insn per cycle              ( +- 14.14% )
+       862,205,157      cache-references:u                                                      ( +- 14.17% )
+        10,666,921      cache-misses:u                   #    2.068 % of all cache refs         ( +- 14.50% )
+        97,879,438      bus-cycles:u                                                            ( +- 14.13% )
 
-       0.867078287 seconds time elapsed
-
-       0.832934000 seconds user
-       0.026337000 seconds sys
-
+           0.83911 +- 0.00315 seconds time elapsed  ( +-  0.38% )
 </pre>
-
-
-t1 | t2 | t3 | t4 | t5 | \<t\>
----|----|----|----|----|------
-0.833 | 0.845 | 0.843 | 0.850 | 0.850 | 0.844
 
 ### Inlined asm
 
-Now we can try to get more from assembler optimisation. We will inline assembler in find element function.
+Using inlining, we can try to get more from assembler optimisation. We will inline assembler in function which find elements.
 
 ```C
 
@@ -304,51 +293,34 @@ int find_elem_inlined_asm (hashtable_t *hashtable, word_t *word)
 ```
 
 <pre>
-            846.58 msec task-clock:u                     #    0.992 CPUs utilized
-                 0      context-switches:u               #    0.000 /sec
-                 0      cpu-migrations:u                 #    0.000 /sec
-             4,859      page-faults:u                    #    5.740 K/sec
-     2,843,655,572      cycles:u                         #    3.359 GHz
-     4,748,420,225      instructions:u                   #    1.67  insn per cycle
-       722,405,686      branches:u                       #  853.326 M/sec
-        16,385,370      branch-misses:u                  #    2.27% of all branches
+    14,194,505,706      cycles:u                                                                ( +- 14.14% )
+    23,742,087,594      instructions:u                   #    2.79  insn per cycle              ( +- 14.14% )
+       871,450,169      cache-references:u                                                      ( +- 14.02% )
+         9,342,416      cache-misses:u                   #    1.773 % of all cache refs         ( +- 13.88% )
+        97,855,145      bus-cycles:u                                                            ( +- 14.13% )
+
+           0.83679 +- 0.00186 seconds time elapsed  ( +-  0.22% )
 </pre>
 
-t1 | t2 | t3 | t4 | t5 | \<t\>
----|----|----|----|----|------
-0.835 | 0.830 | 0.847 | 0.830 | 0.838 | 0.836
-
-
-Time performance boost is 1%, that can be just error, therefore we stopped optimising this function.
+We don't have time performance, but we decreased cache-misses by 0.3%. Therefore we stopped optimising this function.
 
 # Prealigned words
 
-Now we will aligne words and prepare them for avx optimisation before searching tests.
+Now we will aligne words and prepare them for avx optimisation before search tests.
 
 This part briefly repeats stats from previous part of work but with aligned words before searching them in hashtable.
 
 ## Gereral performance
 
 <pre>
-          1,592.77 msec task-clock:u                     #    0.989 CPUs utilized
-                 0      context-switches:u               #    0.000 /sec
-                 0      cpu-migrations:u                 #    0.000 /sec
-            13,769      page-faults:u                    #    8.645 K/sec
-     5,261,223,084      cycles:u                         #    3.303 GHz
-     5,700,922,097      instructions:u                   #    1.08  insn per cycle
-       951,646,153      branches:u                       #  597.478 M/sec
-        44,349,616      branch-misses:u                  #    4.66% of all branches
+    24,258,685,329      cycles:u                                                                ( +- 14.15% )
+    27,771,137,451      instructions:u                   #    1.91  insn per cycle              ( +- 14.14% )
+     1,629,578,265      cache-references:u                                                      ( +- 14.21% )
+        36,256,539      cache-misses:u                   #    3.710 % of all cache refs         ( +- 14.39% )
+       167,407,254      bus-cycles:u                                                            ( +- 14.16% )
 
-       1.610622468 seconds time elapsed
-
-       1.560536000 seconds user
-       0.029934000 seconds sys
-
+           1.43092 +- 0.00500 seconds time elapsed  ( +-  0.35% )
 </pre>
-
-t1 | t2 | t3 | t4 | t5 | \<t\>
----|----|----|----|----|------
-1.560 | 1.526 | 1.560 | 1.492 | 1.498 | 1.527
 
 ## Recursion and strcmp
 
@@ -357,31 +329,17 @@ t1 | t2 | t3 | t4 | t5 | \<t\>
 Stats after recursion deletion:
 
 <pre>
+    20,405,083,685      cycles:u                                                                ( +- 14.14% )
+    21,760,015,564      instructions:u                   #    1.78  insn per cycle              ( +- 14.14% )
+     2,011,326,647      cache-references:u                                                      ( +- 14.14% )
+        46,265,973      cache-misses:u                   #    3.832 % of all cache refs         ( +- 14.49% )
+       140,695,064      bus-cycles:u                                                            ( +- 14.15% )
 
-          1,250.74 msec task-clock:u                     #    1.000 CPUs utilized
-                 0      context-switches:u               #    0.000 /sec
-                 0      cpu-migrations:u                 #    0.000 /sec
-            13,759      page-faults:u                    #   11.001 K/sec
-     4,191,783,655      cycles:u                         #    3.351 GHz
-     4,352,014,349      instructions:u                   #    1.04  insn per cycle
-       667,392,685      branches:u                       #  533.599 M/sec
-        47,571,859      branch-misses:u                  #    7.13% of all branches
-
-       1.251244188 seconds time elapsed
-
-       1.226168000 seconds user
-       0.023268000 seconds sys
-
+           1.20637 +- 0.00493 seconds time elapsed  ( +-  0.41% )
 
 </pre>
 
-
-t1 | t2 | t3 | t4 | t5 | \<t\>
----|----|----|----|----|------
-1.226 | 1.225 | 1.212 | 1.229 | 1.241 | 1.227
-
-Boost in time is 24.5%, branch-missprediction increased in 2.47%.
-
+Boost in time is 19%, cache-misses increased by 0.1%.
 
 ### Strcmp
 
@@ -412,27 +370,17 @@ Stats after using words compare function:
 
 <pre>
 
-          1,153.14 msec task-clock:u                     #    0.992 CPUs utilized
-                 0      context-switches:u               #    0.000 /sec
-                 0      cpu-migrations:u                 #    0.000 /sec
-            13,767      page-faults:u                    #   11.939 K/sec
-     3,770,674,800      cycles:u                         #    3.270 GHz
-     4,682,064,324      instructions:u                   #    1.24  insn per cycle
-       670,906,500      branches:u                       #  581.807 M/sec
-        34,344,398      branch-misses:u                  #    5.12% of all branches
+    18,321,632,017      cycles:u                                                                ( +- 14.14% )
+    23,410,264,518      instructions:u                   #    2.13  insn per cycle              ( +- 14.14% )
+       937,870,447      cache-references:u                                                      ( +- 14.18% )
+        23,263,853      cache-misses:u                   #    4.140 % of all cache refs         ( +- 14.32% )
+       126,492,386      bus-cycles:u                                                            ( +- 14.15% )
 
-       1.162184955 seconds time elapsed
-
-       1.106378000 seconds user
-       0.043130000 seconds sys
+           1.08690 +- 0.00281 seconds time elapsed  ( +-  0.26% )
 
 </pre>
 
-t1 | t2 | t3 | t4 | t5 | \<t\>
----|----|----|----|----|------
-1.106 | 1.094 | 1.103 | 1.092 | 1.102 | 1.099
-
-Time performance boost is 11.6% and percentage of mispredicted branches reduced by 2.01%.
+Time performance boost is 11% and percentage of cache-misses increased by 0.3%.
 
 
 ## Assembler optimisation
@@ -440,28 +388,17 @@ Time performance boost is 11.6% and percentage of mispredicted branches reduced 
 Stats after using crc32 in assembler:
 
 <pre>
-            815.28 msec task-clock:u                     #    0.999 CPUs utilized
-                 0      context-switches:u               #    0.000 /sec
-                 0      cpu-migrations:u                 #    0.000 /sec
-            13,766      page-faults:u                    #   16.885 K/sec
-     2,686,216,621      cycles:u                         #    3.295 GHz
-     4,019,561,542      instructions:u                   #    1.50  insn per cycle
-       563,193,526      branches:u                       #  690.797 M/sec
-        15,696,744      branch-misses:u                  #    2.79% of all branches
+    13,092,060,467      cycles:u                                                                ( +- 14.11% )
+    20,097,751,567      instructions:u                   #    2.56  insn per cycle              ( +- 14.14% )
+       955,089,977      cache-references:u                                                      ( +- 14.11% )
+        21,976,505      cache-misses:u                   #    3.844 % of all cache refs         ( +- 14.00% )
+        90,255,541      bus-cycles:u                                                            ( +- 14.11% )
 
-       0.815870937 seconds time elapsed
+           0.77713 +- 0.00323 seconds time elapsed  ( +-  0.42% )
 
-       0.784871000 seconds user
-       0.029916000 seconds sys
 </pre>
 
-
-
-t1 | t2 | t3 | t4 | t5 | \<t\>
----|----|----|----|----|------
-0.785 | 0.795 | 0.791 | 0.788 | 0.783 | 0.788
-
-Execution time reduced by 39.4% and  branch-misses reduced by 2.33%.
+Execution time reduced by 40% and cache-misses reduced by 0.3%.
 
 ### Inlining
 
@@ -469,34 +406,22 @@ Stats after inlining:
 
 <pre>
 
-            808.14 msec task-clock:u                     #    0.999 CPUs utilized
-                 0      context-switches:u               #    0.000 /sec
-                 0      cpu-migrations:u                 #    0.000 /sec
-            13,766      page-faults:u                    #   17.034 K/sec
-     2,660,979,925      cycles:u                         #    3.293 GHz
-     4,017,279,976      instructions:u                   #    1.51  insn per cycle
-       562,052,742      branches:u                       #  695.493 M/sec
-        15,738,757      branch-misses:u                  #    2.80% of all branches
+    12,924,860,260      cycles:u                                                                ( +- 14.14% )
+    20,086,343,666      instructions:u                   #    2.59  insn per cycle              ( +- 14.14% )
+       942,285,460      cache-references:u                                                      ( +- 14.06% )
+        22,267,030      cache-misses:u                   #    3.928 % of all cache refs         ( +- 14.00% )
+        89,130,275      bus-cycles:u                                                            ( +- 14.13% )
 
-       0.808581397 seconds time elapsed
-
-       0.774355000 seconds user
-       0.033211000 seconds sys
+           0.76792 +- 0.00193 seconds time elapsed  ( +-  0.25% )
 
 </pre>
 
-
-t1 | t2 | t3 | t4 | t5 | \<t\>
----|----|----|----|----|------
-0.774 | 0.778 | 0.785 | 0.776 | 0.785 | 0.780
-
-
-There we also have time performance boost in 1% and no changes in branch-missprediction.
+There we also have time performance boost in 1.3%.
 
 ## Conclusion
 
-Using prealigned words we have 95.8% improvement in time performance and 1.86% in branch-misprediction.
-Without prealigned words we have 72.4% boost in time performance and 2.18% in branch-misprediction.
+Using prealigned words we have 95.8% improvement in time performance and increased cache-misses by 0.1% if we taking the error into account.
+Without prealigned words we have 72.4% boost in time performance and don't have any changes in cache-misses if we taking into account the error.
 
 Ded's performance coefficient:
 
