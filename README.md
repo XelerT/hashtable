@@ -140,7 +140,7 @@ We get 27% improvement in time and cache-misses percentage decreased by 0.3%.
 
 ## Strcmp
 
-Now lets change strcmp. We will compare words which contain their length and pointer to string. For comparing strings we will use avx intrinsics. We didn't alligne strings before searching tests [See next part with aligned words](#prealigned-words)).
+Now lets change strcmp. We will compare words which contain their length and pointer to string. For comparing strings we will use avx intrinsics. We didn't alligne strings before searching tests ([See next part with aligned words](#prealigned-words)).
 
 ```C
 bool avx_wordcmp (word_t *word1, word_t *word2)
@@ -382,8 +382,7 @@ Stats after using words compare function:
 
 </pre>
 
-Time performance boost is 11% and percentage of cache-misses increased by 0.3%.
-
+Time performance boost is 11% and percentage of cache-misses increased by 0.3%. By that we overtake our previous measurements and get an advantage from words alignment.
 
 ## Assembler optimisation
 
