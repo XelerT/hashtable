@@ -291,7 +291,6 @@ int find_elem_inlined_asm (hashtable_t *hashtable, word_t *word)
                 : "r"  (hashtable), "r" (word)
                 : "rcx", "rsi", "memory"
         );
-        // printf("%ld %ld\n", hash, get_word_hash(word));
 
         if (hash >= hashtable->capacity)
                 hash = hash % hashtable->capacity;
@@ -500,7 +499,8 @@ Using prealigned words we have 95.8% improvement in time performance and 1.86% i
 Without prealigned words we have 72.4% boost in time performance and 2.18% in branch-misprediction.
 
 Ded's performance coefficient:
-<img src="https://render.githubusercontent.com/render/math?math=\xi = 1000 \cdot \frac{\text{perf_boost}} {\text{asm_lines}} = 200 ">
+
+$\xi = 1000 \cdot \frac{\text{perf boost}} {\text{asm lines}} = 200$
 
 
 
