@@ -89,6 +89,7 @@ int hash_words (text_t *text, hashtable_t *hashtable, char hash_mode)
                 break;
         default:
 #ifdef  ASM_CRC32_OPTIMISATION
+
                 fill_words_hashtable(text, hashtable, asm_get_crc32_hash);
 #else
                 fill_words_hashtable(text, hashtable, get_crc32_hash);
@@ -118,9 +119,10 @@ size_t find_words_crc32 (hashtable_t *hashtable, word_t *words, size_t n_words)
 #endif /*INL_ASM_CRC32_OPTIMISATION*/
 
 #else
+
                 if (!find_elem(hashtable, words + i, get_crc32_hash))
                         found_n_words++;
-#endif /*INL_ASM_CRC32_OPTIMISATION*/
+#endif /*ASM_CRC32_OPTIMISATION*/
         }
 
         return found_n_words;

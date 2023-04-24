@@ -50,6 +50,8 @@ HASH_CFILES  = hashtable/hashtable.cpp hashtable/optimisation.cpp
 
 ASM_FILES = hashtable/crc32
 CFILES = main.cpp $(TEXT_CFILES) $(LIST_CFILES) $(LOG_CFILES) $(UTILS_CFILES) $(HASH_CFILES)
+GRAPH_CFILES = graph_hashes.cpp $(TEXT_CFILES) $(LIST_CFILES) $(LOG_CFILES) $(UTILS_CFILES) $(HASH_CFILES)
+
 
 OUTPUT = hash-tables.out
 
@@ -58,17 +60,24 @@ IMG_FORMAT      = png
 DOT_FILE_NAME   = list_graph.dot
 
 all:
-	# @ clear
 	@ nasm -f elf64 -l $(ASM_FILES).lst $(ASM_FILES).s
-	@ g++ $(OPTIM_FLAGS) -masm=intel -o $(OUTPUT) $(CFLAGS) $(CFILES) $(ASM_FILES).o -no-pie
+	@ g++ $(OPTIM_FLAGS) -masm=intel -o $(OUTPUT) $(CFLAGS) $(CFILES) $(ASM_FILES).o -no-pie -D$(DFLAG1) -D$(DFLAG2)
 	@ echo Compiled c-files
 
 .PHONY: sanitize
 sanitize:
 	@ clear
 	  nasm -f elf64 -l $(ASM_FILES).lst $(ASM_FILES).s
-	  g++ $(OPTIM_FLAGS) -o $(OUTPUT) $(CFLAGS) $(CFILES) $(ASM_FILES).o -no-pie $(SANITIZE_FLAGS)
+	  g++ $(OPTIM_FLAGS) -o $(OUTPUT) $(CFLAGS) $(CFILES) $(ASM_FILES).o -no-pie -D$(DFLAG1) -D$(DFLAG2) $(SANITIZE_FLAGS)
 	@ echo Compiled c-files
+
+.PHONY: graph_hashes
+graph_hashes:
+	# @ clear
+	@ nasm -f elf64 -l $(ASM_FILES).lst $(ASM_FILES).s
+	@ g++ $(OPTIM_FLAGS) -masm=intel -o $(OUTPUT) $(CFLAGS) $(GRAPH_CFILES) $(ASM_FILES).o -no-pie -D$(DFLAG1)
+	@ echo Compiled c-files
+	@ ./$(OUTPUT)
 
 .PHONY: def
 def:
