@@ -34,14 +34,10 @@ After analizing graphs, we can say that ascii_sum, rol, crc32 can be used as has
 
 ## Optimisation
 ---
-<pre>
-In this part of project <b>crc32</b> was chosen as hash function.
+In this part of project **crc32** was chosen as hash function.
 
-As data base was chosen <b>Atlas Shrugged</b> (~17 000 unique words), as search data used file with words from text and words that <br />
+As data base was chosen **Atlas Shrugged** (~17 000 unique words), as search data used file with words from text and words that
 do not meet in it, total number of words to search is 570391 (one full text and a little bit more) and 67 isn't in text.
-
-</pre>
-
 
 ### General performance
 
@@ -62,7 +58,7 @@ do not meet in it, total number of words to search is 570391 (one full text and 
 
 </pre>
 
-As main performance argument we will choose executing time of program. Therefore we will test performance 5 times and then will get average execution time.
+As main performance argument we will choose execution time of program. Therefore we will test performance 5 times and then will get average execution time.
 
 t1 | t2 | t3 | t4 | t5 | \<t\>
 ---|----|----|----|----|------
@@ -75,7 +71,7 @@ Main time-consuming functions:
 +   22.71%    22.71%  hash-tables.out  hash-tables.out       [.] get_crc32_hash
 </pre>
 
-## Recursion and strcmp
+## Recursion
 
 We started our optimisation from get_word_in_list, as the main time consuming function. Main time expenses is recursive way of checking list's element and, as supposed, strcmp.
 
@@ -114,7 +110,27 @@ bool find_word_in_list (list_t *list, word_t *word, size_t position)
 }
 ```
 
-Firstly we change recursion using cycle. Stats:
+Firstly we change recursion using cycle.
+
+```C
+bool find_word_in_list (list_t *list, word_t *word, size_t position)
+{
+        assert(list);
+        assert(word);
+
+        if (list->size == 0)
+                return false;
+
+        while (list->data[position].next) {
+                if (!strcmp(((word_t*) list->data[position].data)->ptr, word->ptr))
+                        return true;
+                position++;
+        }
+        return false;
+}
+```
+
+ Stats:
 
 <pre>
           1,152.29 msec task-clock:u                     #    0.999 CPUs utilized
@@ -139,7 +155,7 @@ t1 | t2 | t3 | t4 | t5 | \<t\>
 
 We get 26% improvement in time but branch-misprediction percentage increased by 2.35%.
 
-Now we changed strcmp. We will compare words which contain their length and pointer on string. For comparing strings we will use avx intrinsics. We didn't alligne strings before searching tests because of huge memory consumptions (If we had, we would have better performance boost in these optimisation [See next part](#prealigned-words)).
+Now lets change strcmp. We will compare words which contain their length and pointer to string. For comparing strings we will use avx intrinsics. We didn't alligne strings before searching tests [See next part with aligned words](#prealigned-words)).
 
 ```C
           1,122.24 msec task-clock:u                     #    0.999 CPUs utilized
@@ -161,7 +177,7 @@ t1 | t2 | t3 | t4 | t5 | \<t\>
 ---|----|----|----|----|------
 1.112 | 1.100 | 1.114 | 1.116 | 1.114 | 1.111
 
-Inlining of this function don't have any countable effect. We have performance boost in 3%. Therefore we will optimise next function.
+Inlining function don't have any countable effect. We have performance boost in 3%. Therefore we will optimise next function.
 
 <pre>
 +   60.23%    18.86%  hash-tables.out  hash-tables.out       [.] find_word_in_list
@@ -308,9 +324,9 @@ Time performance boost is 1%, that can be just error, therefore we stopped optim
 
 # Prealigned words
 
-If we want to have maximum in searching functions we need to spend more memory to aligne words and compare them using avx registers.
+Now we will aligne words and prepare them for avx optimisation before searching tests.
 
-This part breifly repeats stats from previous part of work but with aligned words before searching them in hashtable.
+This part briefly repeats stats from previous part of work but with aligned words before searching them in hashtable.
 
 ## Gereral performance
 
@@ -337,10 +353,9 @@ t1 | t2 | t3 | t4 | t5 | \<t\>
 
 ## Recursion and strcmp
 
-### Recoursion
+### Recursion
 
-Stats after recursion deletation:
-
+Stats after recursion deletion:
 
 <pre>
 
@@ -485,8 +500,7 @@ Using prealigned words we have 95.8% improvement in time performance and 1.86% i
 Without prealigned words we have 72.4% boost in time performance and 2.18% in branch-misprediction.
 
 Ded's performance coefficient:
-$$ \xi = 1000 \cdot \frac{perf_boost} {asm_lines} = 200 $$
-
+<img src="https://render.githubusercontent.com/render/math?math=\xi = 1000 \cdot \frac{\text{perf_boost}} {\text{asm_lines}} = 200 ">
 
 
 

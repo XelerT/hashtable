@@ -13,14 +13,14 @@ elif [[ "$run_mode" == "tests" ]]; then
         for opt in {0..4}; do
                 echo DFLAG1=${optimisations[$opt]} DFLAG2=${optimisations[6]}
                 make DFLAG1=${optimisations[$opt]} DFLAG2=${optimisations[6]}
-                        perf stat -r 5 ./hash-tables.out
+                perf stat -r 5 ./hash-tables.out
                 echo "================================================================================================"
         done
         echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
         for opt in {0..4}; do
                 echo DFLAG1=${optimisations[$opt]} DFLAG2=${optimisations[5]}
                 make DFLAG1=${optimisations[$opt]} DFLAG2=${optimisations[5]}
-                        perf stat -r 5 ./hash-tables.out
+                perf stat -r 5 ./hash-tables.out
                 echo "================================================================================================"
         done
 else
