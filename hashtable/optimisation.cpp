@@ -50,17 +50,16 @@ int find_elem_inlined_asm (hashtable_t *hashtable, word_t *word)
 
         asm (
                 "mov %0, 0xFFFFFFFF\n\t"
-                "mov rcx, qword [%2]\n\t"
-                "mov rsi, qword [%2 - 0x8]\n\t"
+                "mov rcx, qword [%1]\n\t"
+                "mov rsi, qword [%1 - 0x8]\n\t"
                 ".hash:\n"
                 "crc32 %0, byte ptr [rsi]\n\t"
                 "inc rsi\n\t"
                 "loop .hash\n"
-                : "=r" (hash)
-                : "r"  (hashtable), "r" (word)
+                : "=a" (hash)
+                : "D" (word)
                 : "rcx", "rsi", "memory"
         );
-        // printf("%ld %ld\n", hash, get_word_hash(word));
 
         if (hash >= hashtable->capacity)
                 hash = hash % hashtable->capacity;

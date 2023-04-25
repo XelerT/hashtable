@@ -75,9 +75,10 @@ sanitize:
 graph_hashes:
 	# @ clear
 	@ nasm -f elf64 -l $(ASM_FILES).lst $(ASM_FILES).s
-	@ g++ $(OPTIM_FLAGS) -masm=intel -o $(OUTPUT) $(CFLAGS) $(GRAPH_CFILES) $(ASM_FILES).o -no-pie -D$(DFLAG1)
+	@ g++ $(OPTIM_FLAGS) -masm=intel -o $(OUTPUT) $(CFLAGS) $(GRAPH_CFILES) $(ASM_FILES).o -no-pie -DNO_OPTIMISATION -DNOPRE_ALIGNEED_WORDS
 	@ echo Compiled c-files
 	@ ./$(OUTPUT)
+	@ python graphics/graph.py
 
 .PHONY: def
 def:

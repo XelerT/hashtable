@@ -179,7 +179,7 @@ bool avx_wordcmp (word_t *word1, word_t *word2)
            1.13374 +- 0.00337 seconds time elapsed  ( +-  0.30% )
 </pre>
 
-We don't have time performance boost and have worse results in cache-misses. Inlining function also don't have any countable effect. Therefore we will optimise next function.
+We don't have time performance boost and have worse results in cache-misses. Inlining function also doesn't have any countable effect. Therefore we will optimise next function.
 
 Results after:
 <pre>
@@ -272,14 +272,14 @@ int find_elem_inlined_asm (hashtable_t *hashtable, word_t *word)
 
         asm (
                 "mov %0, 0xFFFFFFFF\n\t"
-                "mov rcx, qword [%2]\n\t"
-                "mov rsi, qword [%2 - 0x8]\n\t"
+                "mov rcx, qword [%1]\n\t"
+                "mov rsi, qword [%1 - 0x8]\n\t"
                 ".hash:\n"
                 "crc32 %0, byte ptr [rsi]\n\t"
                 "inc rsi\n\t"
                 "loop .hash\n"
-                : "=r" (hash)
-                : "r"  (hashtable), "r" (word)
+                : "=a" (hash)
+                : "D" (word)
                 : "rcx", "rsi", "memory"
         );
 
@@ -422,7 +422,7 @@ There we also have time performance boost in 1.3%.
 ## Conclusion
 
 Using prealigned words we have 95.8% improvement in time performance and increased cache-misses by 0.1% if we taking the error into account.
-Without prealigned words we have 72.4% boost in time performance and don't have any changes in cache-misses if we taking into account the error.
+Without prealigned words we have 72.4% boost in time performance and we don't have any changes in cache-misses if we taking into account the error.
 
 Ded's performance coefficient:
 

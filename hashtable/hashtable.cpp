@@ -88,6 +88,7 @@ int hash_words (text_t *text, hashtable_t *hashtable, char hash_mode)
                 fill_words_hashtable(text, hashtable, get_my_hash);
                 break;
         default:
+
 #ifdef  ASM_CRC32_OPTIMISATION
 
                 fill_words_hashtable(text, hashtable, asm_get_crc32_hash);
