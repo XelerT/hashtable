@@ -6,7 +6,7 @@ const int DEFAULT_N_VARS  = 16;
 const int DEFAULT_N_FUNCS = 16;
 const int DEFAULT_N_TABLS =  4;
 
-const int HASHTABLE_SIZE  = 32;
+const int HASHTABLE_SIZE  = 512;
 
 const int m256_BYTE_CAPACITY   = 32;
 

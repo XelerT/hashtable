@@ -1,0 +1,13 @@
+# started on Wed Apr 26 10:00:29 2023
+
+
+ Performance counter stats for './hash-tables.out' (5 runs):
+
+     4,541,677,015      cycles:u                                                                ( +- 14.42% )
+     4,555,606,132      instructions:u                   #    1.72  insn per cycle              ( +- 14.14% )
+       110,739,757      cache-references:u                                                      ( +- 14.11% )
+        19,155,340      cache-misses:u                   #   28.832 % of all cache refs         ( +- 15.82% )
+        33,017,712      bus-cycles:u                                                            ( +- 14.57% )
+
+            0.3108 +- 0.0165 seconds time elapsed  ( +-  5.29% )
+

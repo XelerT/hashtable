@@ -11,8 +11,6 @@ int main (int argc, char *argv[])
 {
         log_init("hashtable_logs.html");
 
-        // test_all_hash_funcs("input.txt");
-
         FILE *input_file = fopen("input.txt", "r");
         text_t text = {};
         get_text(input_file, &text, "input.txt");

@@ -50,20 +50,7 @@ Without any optimisations we have this results:
 
 <pre>
 
-# started on Wed Apr 26 10:00:16 2023
-
-
- Performance counter stats for './hash-tables.out' (5 runs):
-
-     9,814,693,083      cycles:u                                                                ( +- 14.23% )
-     7,346,503,526      instructions:u                   #    1.23  insn per cycle              ( +- 14.14% )
-       144,168,623      cache-references:u                                                      ( +- 14.21% )
-        17,306,438      cache-misses:u                   #   19.986 % of all cache refs         ( +- 14.21% )
-        68,989,393      bus-cycles:u                                                            ( +- 14.26% )
-
-            0.6185 +- 0.0295 seconds time elapsed  ( +-  4.77% )
-
-
+!*!*!* 1*!*!*!
 
 </pre>
 
@@ -137,20 +124,7 @@ bool find_word_in_list (list_t *list, word_t *word, size_t position)
 
 <pre>
 
-# started on Wed Apr 26 10:00:20 2023
-
-
- Performance counter stats for './hash-tables.out' (5 runs):
-
-     9,586,179,396      cycles:u                                                                ( +- 14.35% )
-     7,130,700,603      instructions:u                   #    1.23  insn per cycle              ( +- 14.14% )
-       173,801,521      cache-references:u                                                      ( +- 14.11% )
-        19,419,971      cache-misses:u                   #   18.632 % of all cache refs         ( +- 15.58% )
-        67,687,892      bus-cycles:u                                                            ( +- 14.42% )
-
-            0.6054 +- 0.0365 seconds time elapsed  ( +-  6.03% )
-
-
+!*!*!* 2*!*!*!
 
 </pre>
 
@@ -189,20 +163,7 @@ bool avx_wordcmp (word_t *word1, word_t *word2)
 
 <pre>
 
-# started on Wed Apr 26 10:00:24 2023
-
-
- Performance counter stats for './hash-tables.out' (5 runs):
-
-    10,068,651,642      cycles:u                                                                ( +- 14.51% )
-     7,972,085,027      instructions:u                   #    1.32  insn per cycle              ( +- 14.14% )
-       115,153,487      cache-references:u                                                      ( +- 14.19% )
-        28,541,833      cache-misses:u                   #   41.399 % of all cache refs         ( +- 16.38% )
-        73,387,191      bus-cycles:u                                                            ( +- 14.66% )
-
-            0.6800 +- 0.0356 seconds time elapsed  ( +-  5.24% )
-
-
+!*!*!* 3*!*!*!
 
 </pre>
 
@@ -276,20 +237,7 @@ Result of this optimisation is pretty good. Time performance boost is 34% and mi
 
 <pre>
 
-# started on Wed Apr 26 10:00:29 2023
-
-
- Performance counter stats for './hash-tables.out' (5 runs):
-
-     4,541,677,015      cycles:u                                                                ( +- 14.42% )
-     4,555,606,132      instructions:u                   #    1.72  insn per cycle              ( +- 14.14% )
-       110,739,757      cache-references:u                                                      ( +- 14.11% )
-        19,155,340      cache-misses:u                   #   28.832 % of all cache refs         ( +- 15.82% )
-        33,017,712      bus-cycles:u                                                            ( +- 14.57% )
-
-            0.3108 +- 0.0165 seconds time elapsed  ( +-  5.29% )
-
-
+!*!*!* 4*!*!*!
 
 </pre>
 
@@ -332,20 +280,7 @@ int find_elem_inlined_asm (hashtable_t *hashtable, word_t *word)
 
 <pre>
 
-# started on Wed Apr 26 10:00:31 2023
-
-
- Performance counter stats for './hash-tables.out' (5 runs):
-
-     4,453,677,629      cycles:u                                                                ( +- 14.30% )
-     4,544,198,235      instructions:u                   #    1.74  insn per cycle              ( +- 14.14% )
-       111,936,068      cache-references:u                                                      ( +- 14.20% )
-        16,761,227      cache-misses:u                   #   25.038 % of all cache refs         ( +- 15.59% )
-        32,062,665      bus-cycles:u                                                            ( +- 14.37% )
-
-            0.3002 +- 0.0191 seconds time elapsed  ( +-  6.35% )
-
-
+!*!*!* 5*!*!*!
 
 </pre>
 
@@ -361,20 +296,7 @@ This part briefly repeats stats from previous part of work but with aligned word
 
 <pre>
 
-# started on Wed Apr 26 10:00:34 2023
-
-
- Performance counter stats for './hash-tables.out' (5 runs):
-
-    10,527,376,585      cycles:u                                                                ( +- 14.10% )
-     7,571,753,098      instructions:u                   #    1.18  insn per cycle              ( +- 14.14% )
-       160,576,595      cache-references:u                                                      ( +- 14.10% )
-        33,964,576      cache-misses:u                   #   34.986 % of all cache refs         ( +- 13.76% )
-        74,579,180      bus-cycles:u                                                            ( +- 14.11% )
-
-            0.6842 +- 0.0289 seconds time elapsed  ( +-  4.22% )
-
-
+!*!*!* 6*!*!*!
 
 </pre>
 
@@ -386,20 +308,7 @@ Stats after recursion deletion:
 
 <pre>
 
-# started on Wed Apr 26 10:00:38 2023
-
-
- Performance counter stats for './hash-tables.out' (5 runs):
-
-    10,271,006,292      cycles:u                                                                ( +- 14.13% )
-     7,345,892,450      instructions:u                   #    1.21  insn per cycle              ( +- 14.14% )
-       202,215,794      cache-references:u                                                      ( +- 14.15% )
-        48,774,689      cache-misses:u                   #   40.320 % of all cache refs         ( +- 14.12% )
-        74,933,277      bus-cycles:u                                                            ( +- 14.15% )
-
-            0.7023 +- 0.0246 seconds time elapsed  ( +-  3.50% )
-
-
+!*!*!* 7*!*!*!
 
 </pre>
 
@@ -434,20 +343,7 @@ Stats after using words compare function:
 
 <pre>
 
-# started on Wed Apr 26 10:00:43 2023
-
-
- Performance counter stats for './hash-tables.out' (5 runs):
-
-    10,068,901,532      cycles:u                                                                ( +- 14.13% )
-     7,657,365,128      instructions:u                   #    1.25  insn per cycle              ( +- 14.14% )
-       127,369,990      cache-references:u                                                      ( +- 14.12% )
-        36,649,114      cache-misses:u                   #   47.933 % of all cache refs         ( +- 13.50% )
-        72,880,125      bus-cycles:u                                                            ( +- 14.07% )
-
-            0.6805 +- 0.0196 seconds time elapsed  ( +-  2.88% )
-
-
+!*!*!* 8*!*!*!
 
 </pre>
 
@@ -459,20 +355,7 @@ Stats after using crc32 in assembler:
 
 <pre>
 
-# started on Wed Apr 26 10:00:47 2023
-
-
- Performance counter stats for './hash-tables.out' (5 runs):
-
-     4,427,933,627      cycles:u                                                                ( +- 14.38% )
-     4,239,800,041      instructions:u                   #    1.65  insn per cycle              ( +- 14.14% )
-       125,892,902      cache-references:u                                                      ( +- 14.12% )
-        25,828,351      cache-misses:u                   #   34.107 % of all cache refs         ( +- 14.89% )
-        31,926,629      bus-cycles:u                                                            ( +- 14.47% )
-
-            0.3214 +- 0.0198 seconds time elapsed  ( +-  6.17% )
-
-
+!*!*!* 9*!*!*!
 
 </pre>
 
@@ -484,20 +367,7 @@ Stats after inlining:
 
 <pre>
 
-# started on Wed Apr 26 10:00:50 2023
-
-
- Performance counter stats for './hash-tables.out' (5 runs):
-
-     4,369,102,449      cycles:u                                                                ( +- 14.38% )
-     4,228,392,449      instructions:u                   #    1.67  insn per cycle              ( +- 14.14% )
-       125,862,482      cache-references:u                                                      ( +- 14.13% )
-        24,189,442      cache-misses:u                   #   31.946 % of all cache refs         ( +- 15.05% )
-        31,603,709      bus-cycles:u                                                            ( +- 14.53% )
-
-            0.3197 +- 0.0210 seconds time elapsed  ( +-  6.57% )
-
-
+!*!*!*10*!*!*!
 
 </pre>
 
