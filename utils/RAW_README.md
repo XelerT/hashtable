@@ -4,6 +4,7 @@
 ## Overview
 
 1) [Introduction](#what-is-it?)
+2) [Hashfunctions](#hashfuncs-overview)
 2) [Optimisation](#optimisation)
 3) [Tests without prealocation](#general-performance)
 4) [Tests with prealocation](#prealigned-and-prealloced-words)
@@ -22,7 +23,7 @@ A hashtable or hash map is a data structure that implements an associative array
 3. This hashcodes is the indexes of lists in hashtable.
 4. If words has the same hash they are are inserted into next position in list.
 
-## Hash-funcs overview
+## Hashfuncs overview
 
 Before testing hashtable we need to choose the best hash function. We have 6 function to compare:
 

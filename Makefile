@@ -73,7 +73,6 @@ sanitize:
 
 .PHONY: graph_hashes
 graph_hashes:
-	# @ clear
 	@ nasm -f elf64 -l $(ASM_FILES).lst $(ASM_FILES).s
 	@ g++ $(OPTIM_FLAGS) -masm=intel -o $(OUTPUT) $(CFLAGS) $(GRAPH_CFILES) $(ASM_FILES).o -no-pie -DNO_OPTIMISATION -DNOPRE_ALIGNEED_WORDS
 	@ echo Compiled c-files
