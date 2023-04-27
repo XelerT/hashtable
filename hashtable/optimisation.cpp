@@ -19,8 +19,8 @@ bool avx_wordcmp (word_t *word1, word_t *word2)
 
 #ifdef PRE_ALIGNED_WORDS
 
-        __m256i avx_str1 = _mm256_lddqu_si256((__m256i*) word1->ptr);
-        __m256i avx_str2 = _mm256_lddqu_si256((__m256i*) word2->ptr);
+        __m256i avx_str1 = _mm256_load_si256((__m256i*) word1->ptr);
+        __m256i avx_str2 = _mm256_load_si256((__m256i*) word2->ptr);
 
 #else
         char str1[m256_BYTE_CAPACITY] = {'\0'};

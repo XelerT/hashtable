@@ -82,7 +82,7 @@ graph_hashes:
 
 .PHONY: write_readme
 write_readme:
-	@ g++ -o write_readme.out $(CFLAGS) utils/write_readme.cpp $(TEXT_CFILES) $(LOG_CFILES)
+	@ g++ -o write_readme.out utils/write_readme.cpp $(TEXT_CFILES) $(LOG_CFILES)
 	@ ./write_readme.out
 
 .PHONY: def

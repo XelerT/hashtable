@@ -54,7 +54,9 @@ int main (int argc, char *argv[])
         aligne_words(&text_words2find);
 #endif /*PRE_ALIGNED_WORDS*/
 
-        printf("Found %ld words from %ld\n", find_words_crc32(&hashtable, text_words2find.words, text_words2find.n_words), text_words2find.n_words);
+        for (int i = 0; i < 5; i++) {
+                find_words_crc32(&hashtable, text_words2find.words, text_words2find.n_words);
+        }
 
         text_dtor(&text);
         text_dtor(&text_words2find);

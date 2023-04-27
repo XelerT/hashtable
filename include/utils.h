@@ -6,7 +6,7 @@ const int DEFAULT_N_VARS  = 16;
 const int DEFAULT_N_FUNCS = 16;
 const int DEFAULT_N_TABLS =  4;
 
-const int HASHTABLE_SIZE  = 512;
+const int HASHTABLE_SIZE  = 521;
 
 const int m256_BYTE_CAPACITY   = 32;
 
@@ -44,7 +44,7 @@ enum main_errors {
         NO_ELEMENT    = 0xBADE1E
 };
 
-void my_rol (void *val, size_t sizeof_val, size_t max_iter);
-void my_ror (void *val, size_t sizeof_val, size_t max_iter);
+void my_rol (void *val, size_t sizeof_val, char shift);
+void my_ror (void *val, size_t sizeof_val, char shift);
 
 #endif /*UTILS_H*/

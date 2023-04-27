@@ -120,7 +120,6 @@ size_t find_words_crc32 (hashtable_t *hashtable, word_t *words, size_t n_words)
 #endif /*INL_ASM_CRC32_OPTIMISATION*/
 
 #else
-
                 if (!find_elem(hashtable, words + i, get_crc32_hash))
                         found_n_words++;
 #endif /*ASM_CRC32_OPTIMISATION*/
@@ -153,14 +152,16 @@ bool find_word_in_list (list_t *list, word_t *word, size_t position)
         if (list->size == 0)
                 return false;
 
-#ifdef NO_OPTIMISATION
+#if defined(NO_OPTIMISATION) || defined(INL_ASM_CRC32_OPTIMISATION) || defined(ASM_CRC32_OPTIMISATION)
+#if !defined(CYCLE_OPTIMISATION) && !defined(AVX_OPTIMISATION)
 
         if (!strcmp(((word_t*) list->data[position].data)->ptr, word->ptr)) {
                 return true;
         } else if (list->data[position].next != 0) {
                 return find_word_in_list(list, word, list->data[position].next);
         }
-#endif /*NO_OPTIMISATION*/
+#endif /*CYCLE_OPTIMISATION && AVX_OPTIMISATION*/
+#endif /*(NO_OPTIMISATION || INL_ASM_CRC32_OPTIMISATION || ASM_CRC32_OPTIMISATION)*/
 
 #ifdef CYCLE_OPTIMISATION
 
@@ -169,6 +170,8 @@ bool find_word_in_list (list_t *list, word_t *word, size_t position)
                         return true;
                 position++;
         }
+        if (!strcmp(((word_t*) list->data[position].data)->ptr, word->ptr))
+                return true;
 #endif /*CYCLE_OPTIMISATION*/
 
 #ifdef AVX_OPTIMISATION
@@ -178,6 +181,8 @@ bool find_word_in_list (list_t *list, word_t *word, size_t position)
                         return true;
                 position = list->data[position].next;
         }
+        if (!strcmp(((word_t*) list->data[position].data)->ptr, word->ptr))
+                return true;
 #endif /*AVX_OPTIMISATION*/
 
         return false;
@@ -255,7 +260,7 @@ size_t get_rol_hash (word_t *word)
 
         size_t hash = 0;
         for (size_t i = 0; i < word->length; i++) {
-                my_rol(&hash, sizeof(hash), sizeof(hash) - 8);
+                my_rol(&hash, sizeof(hash), 1);
                 hash = hash ^ word->ptr[i];
         }
         return hash;
@@ -267,7 +272,7 @@ size_t get_ror_hash (word_t *word)
 
         size_t hash = 0;
         for (size_t i = 0; i < word->length; i++) {
-                my_ror(&hash, sizeof(hash), sizeof(hash) - 8);
+                my_ror(&hash, sizeof(hash), 1);
                 hash = hash ^ word->ptr[i];
         }
         return hash;
@@ -365,7 +370,9 @@ int test_all_hash_funcs (const char *input_file_name)
         };
 
         FILE *output = fopen("graphics/test_all.txt", "w");
-        char buf[HASHTABLE_SIZE * 64] = {'\0'};
+        char *buf = (char*) calloc(HASHTABLE_SIZE * 64, sizeof(char));
+                if (!buf)
+                        return NULL_CALLOC;
         int buf_size = 0;
         int n_wr_chars = 0;
 

@@ -140,7 +140,6 @@ int aligne_words (text_t *text)
         assert(text);
 
         word_t *words = text->words;
-        // char *aligned_words = (char*) calloc(text->n_words * m256_BYTE_CAPACITY + 1, sizeof(char));
         char *aligned_words = (char*) aligned_alloc(m256_BYTE_CAPACITY,
                                                    (text->n_words * m256_BYTE_CAPACITY + 1) * sizeof(char));
 
@@ -150,6 +149,8 @@ int aligne_words (text_t *text)
         }
 
         for (size_t i = 0, j = 0; i < text->n_words; i++, j += m256_BYTE_CAPACITY) {
+                if (words[i].length > 32)
+                        printf("TOOMUCH\n");
                 memcpy(aligned_words + j, words[i].ptr, words[i].length);
                 words[i].ptr = aligned_words + j;
         }
