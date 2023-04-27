@@ -21,7 +21,7 @@ A hashtable or hash map is a data structure that implements an associative array
 2. If word was already added, skip it.
 2. Calculate hashcodes for every word.
 3. This hashcodes is the indexes of lists in hashtable.
-4. If words has the same hash they are are inserted into next position in list.
+4. If words has the same hash they are inserted into next position in list.
 
 ## Hashfuncs overview
 
@@ -74,7 +74,7 @@ Also you can generate README.md file with your last perf stats:
 </details>
 
 
-Without any optimisations we have this results:
+Without any optimisations we have these results:
 
 <pre>
 # started on Thu Apr 27 09:55:55 2023
@@ -235,7 +235,7 @@ int find_elem_inlined_asm (hashtable_t *hashtable, word_t *word)
 
 </pre>
 
-We don't have time performance boost. Therefore we stopped optimising this function.
+We don't have time performance boost. Therefore we stop optimising this function.
 
 <pre>
 +   66.37%     1.08%  hash-tables.out  hash-tables.out       [.] find_elem_inlined_asm (inlined)
@@ -283,7 +283,7 @@ bool find_word_in_list (list_t *list, word_t *word, size_t position)
 }
 ```
 
-Firstly we change recursion using cycle.
+Firstly we change recursion using cycle:
 
 ```C
 bool find_word_in_list (list_t *list, word_t *word, size_t position)
@@ -372,7 +372,7 @@ bool avx_wordcmp (word_t *word1, word_t *word2)
 
 </pre>
 
-We have downgrade in time performance boost and have much worse results in cache-misses. Therefore we will optimise next function.
+We have downgrade in time performance and have much worse results in cache-misses. Therefore we will optimise next function.
 
 Results after:
 <pre>
@@ -385,7 +385,7 @@ Results after:
 
 # Prealigned and prealloced words
 
-Now we will briefly repeat previous part of work but we will aligne words using **aligned_alloc()**, preparing them for avx optimisation before testing search.
+Now we will briefly repeat previous part of work but we will align words using **aligned_alloc()**, preparing them for avx optimisation before testing search.
 
 ## Gereral performance
 
@@ -456,7 +456,7 @@ There we also don't have time performance boost.
 
 ### Recursion
 
-Stats after recursion deletion:
+After removing recursion we have these stats:
 
 <pre>
 # started on Thu Apr 27 09:57:28 2023
@@ -536,7 +536,7 @@ Cycle            |      0.625830 ( -236%)   |      0.650530  ( -208%)
 AVX strcmp       |      0.670350 ( -213%)   |      0.648290  ( -209%)      
 
 
-Using prealigned words we have 209% improvement in time performance and don't have improvement in cache-misses if we taking the error into account.
+Using prealigned and prealloced words we have 209% improvement in time performance and don't have improvement in cache-misses if we taking the error into account.
 Without prealigned words we have 213% boost in time performance and we don't have any changes in cache-misses if we taking into account the error.
 
 With prealloced words time performance is 3% better.
