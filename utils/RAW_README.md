@@ -432,6 +432,8 @@ Without prealigned words we have 302% boost in time performance and we reduced c
 
 With prealloced words time performance is 0.5% better but with error we don't have any benefit.
 
-Ded's performance coefficient:
+Ded's performance coefficients:
 
-$\xi = 1000 \cdot \frac{\text{perf boost}} {\text{asm lines}} = 310$
+$\xi_1 = 1000 \cdot \frac{\text{perf boost}} {\text{asm lines}} = 400$
+
+$\xi_2 = 1000 \cdot \frac{\text{perf boost}} {\text{asm lines}} = 369$
