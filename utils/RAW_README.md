@@ -50,7 +50,7 @@ After analyzing graphs, we can say that rol and crc32 can be used as hash-functi
 In this part of project **crc32** was chosen as hash function.
 
 As data base was chosen **Atlas Shrugged** (~17 000 unique words), as search data used file with words from text and words that
-do not meet in it, total number of words to search is 570391 and 67 isn't in text. We will search words in hashtable 5 times.
+do not meet in it, total number of words to search is 570391 and 67 isn't in text. We will search words in hashtable 50 times.
 
 ### General performance
 
@@ -83,13 +83,18 @@ Without any optimisations we have these results:
 Main time-consuming functions:
 
 <pre>
--   66.32%    66.31%  hash-tables.out  hash-tables.out       [.] get_crc32_hash
+-   69.53%    69.53%  hash-tables.out  hash-tables.out       [.] get_crc32_hash           main
+         - 68.02% find_words_crc32
+            - 67.98% find_elem
+                 get_crc32_hash
+         + 1.43% hash_words
+-   24.46%    13.06%  hash-tables.out  hash-tables.out       [.] find_word_in_list
       - main
-         + 55.15% find_words_crc32
-         + 11.10% hash_words
--   22.69%    11.95%  hash-tables.out  hash-tables.out       [.] find_word_in_list
-        + 11.50% _start
-        + 10.74% find_word_in_list
+         + 12.39% find_words_crc32
+   + 11.40% find_word_in_list
+-    5.39%     5.39%  hash-tables.out  libc.so.6             [.]
+   - main
+      + 5.28% find_words_crc32
 </pre>
 
 ## Assembler optimisation
@@ -149,7 +154,7 @@ asm_get_crc32_hash:
         ret
 ```
 
-Result of this optimisation is very good. Time performance boost is 196% and cache-misses reduced by 5.5%.
+Result of this optimisation is very good. Time performance boost is 245% and cache-misses reduced by 20.8%.
 
 <pre>
 !*!*!* 4*!*!*!
@@ -199,14 +204,20 @@ int find_elem_inlined_asm (hashtable_t *hashtable, word_t *word)
 We don't have time performance boost. Therefore we stop optimising this function.
 
 <pre>
-+   66.37%     1.08%  hash-tables.out  hash-tables.out       [.] find_elem_inlined_asm (inlined)
-+   62.68%    31.34%  hash-tables.out  hash-tables.out       [.] find_word_in_list
-
+-   74.12%    39.31%  hash-tables.out  hash-tables.out       [.] find_word_in_list
+   + 37.76% _start
+   - 34.85% find_word_in_list
+-   18.94%    18.94%  hash-tables.out  hash-tables.out       [.] .hash
+      - main
+         + 18.19% find_words_crc32
+-   15.30%    15.30%  hash-tables.out  libc.so.6             [.] 0x0000000000155bab
+   - main
+      + 15.05% find_words_crc32
 </pre>
 
 ## Recursion
 
-Now let's optimise get_word_in_list function. Main time expenses is recursive way of checking list's element:
+Now let's optimise find_word_in_list function. Main time expenses is recursive way of checking list's element:
 
 ```C
 bool find_word_in_list (list_t *list, word_t *word, size_t position)
@@ -270,7 +281,7 @@ bool find_word_in_list (list_t *list, word_t *word, size_t position)
 !*!*!* 2*!*!*!
 </pre>
 
-We get 14% improvement in time and don't have any change in cache-misses if we take error into account.
+We get 16% improvement in time and don't have any change in cache-misses if we take error into account.
 
 ## Strcmp
 
@@ -336,7 +347,7 @@ Stats after using crc32 in assembly:
 !*!*!* 9*!*!*!
 </pre>
 
-Execution time reduced by 172%.
+Execution time reduced by 211%.
 
 ### Inlining
 
@@ -358,7 +369,7 @@ After removing recursion we have these stats:
 !*!*!* 7*!*!*!
 </pre>
 
-Boost in time is 13%.
+Boost in time is 17.5%.
 
 ### Strcmp
 
@@ -391,7 +402,7 @@ Stats after using words compare function:
 !*!*!* 8*!*!*!
 </pre>
 
-We don't have any difference in time performance but make cache-misses worse.
+We have small difference in time performance but we made cache-misses worse.
 
 ## Conclusion
 
@@ -399,10 +410,27 @@ Stats relative to general performance:
 
 !*!*!*TABLE!*!*!*
 
-Using prealigned and prealloced words we have 209% improvement in time performance and don't have improvement in cache-misses if we taking the error into account.
-Without prealigned words we have 213% boost in time performance and we don't have any changes in cache-misses if we taking into account the error.
+We can say that we don't need to use AVX optimisation because it becomes the most time time consuming function. Strcmp is only 1% of searching function. Maybe if we had word data base only with very long words we would have some benefit from this optimisation.
 
-With prealloced words time performance is 3% better.
+<pre>
+-   68.51%    34.08%  hash-tables.out  hash-tables.out       [.] find_word_in_list
+   - 34.42% find_word_in_list
+        ...
+        1.06% strcmp@plt
+   + 33.66% _start
++   21.97%    21.97%  hash-tables.out  hash-tables.out       [.] .hash
+</pre>
+
+<pre>
+-   74.45%    24.42%  hash-tables.out  hash-tables.out       [.] find_word_in_list
+   - 50.03% find_word_in_list
+      + 49.98% avx_wordcmp
+</pre>
+
+Without avx optimisation and using prealigned and prealloced words we have 269% improvement in time performance and have improvement in cache-misses on 14%.
+Without prealigned words we have 302% boost in time performance and we reduced cache-misses by 22%.
+
+With prealloced words time performance is 0.5% better but with error we don't have any benefit.
 
 Ded's performance coefficient:
 

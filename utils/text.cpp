@@ -135,7 +135,7 @@ void divide_text_on_words (text_t *text)
         }
 }
 
-int aligne_words (text_t *text)
+int align_words (text_t *text)
 {
         assert(text);
 

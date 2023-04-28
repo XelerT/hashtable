@@ -45,6 +45,6 @@ void divide_text_on_words (text_t *text);
 
 char *skip_tabs           (char   *line);
 
-int aligne_words (text_t *text);
+int align_words (text_t *text);
 
 #endif /*TEXT_H*/

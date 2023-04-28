@@ -50,7 +50,7 @@ After analyzing graphs, we can say that rol and crc32 can be used as hash-functi
 In this part of project **crc32** was chosen as hash function.
 
 As data base was chosen **Atlas Shrugged** (~17 000 unique words), as search data used file with words from text and words that
-do not meet in it, total number of words to search is 570391 and 67 isn't in text. We will search words in hashtable 5 times.
+do not meet in it, total number of words to search is 570391 and 67 isn't in text. We will search words in hashtable 50 times.
 
 ### General performance
 
@@ -77,18 +77,18 @@ Also you can generate README.md file with your last perf stats:
 Without any optimisations we have these results:
 
 <pre>
-# started on Thu Apr 27 09:55:55 2023
+# started on Fri Apr 28 13:00:24 2023
 
 
  Performance counter stats for './hash-tables.out' (10 runs):
 
-    52,089,683,811      cycles:u                                                                ( +-  9.53% )
-    37,067,852,121      instructions:u                   #    1.29  insn per cycle              ( +-  9.57% )
-       831,042,517      cache-references:u                                                      ( +-  9.52% )
-        63,095,350      cache-misses:u                   #   13.822 % of all cache refs         ( +-  7.57% )
-       501,660,578      bus-cycles:u                                                            ( +-  9.52% )
+   435,666,338,866      cycles:u                                                                ( +-  9.51% )
+   289,238,099,557      instructions:u                   #    1.19  insn per cycle              ( +-  9.57% )
+     7,069,852,233      cache-references:u                                                      ( +-  9.56% )
+     1,325,549,662      cache-misses:u                   #   33.969 % of all cache refs         ( +-  9.14% )
+     4,192,165,736      bus-cycles:u                                                            ( +-  9.51% )
 
-            2.1046 +- 0.0113 seconds time elapsed  ( +-  0.53% )
+            17.545 +- 0.262 seconds time elapsed  ( +-  1.49% )
 
 
 </pre>
@@ -96,13 +96,18 @@ Without any optimisations we have these results:
 Main time-consuming functions:
 
 <pre>
--   66.32%    66.31%  hash-tables.out  hash-tables.out       [.] get_crc32_hash
+-   69.53%    69.53%  hash-tables.out  hash-tables.out       [.] get_crc32_hash           main
+         - 68.02% find_words_crc32
+            - 67.98% find_elem
+                 get_crc32_hash
+         + 1.43% hash_words
+-   24.46%    13.06%  hash-tables.out  hash-tables.out       [.] find_word_in_list
       - main
-         + 55.15% find_words_crc32
-         + 11.10% hash_words
--   22.69%    11.95%  hash-tables.out  hash-tables.out       [.] find_word_in_list
-        + 11.50% _start
-        + 10.74% find_word_in_list
+         + 12.39% find_words_crc32
+   + 11.40% find_word_in_list
+-    5.39%     5.39%  hash-tables.out  libc.so.6             [.]
+   - main
+      + 5.28% find_words_crc32
 </pre>
 
 ## Assembler optimisation
@@ -162,21 +167,21 @@ asm_get_crc32_hash:
         ret
 ```
 
-Result of this optimisation is very good. Time performance boost is 196% and cache-misses reduced by 5.5%.
+Result of this optimisation is very good. Time performance boost is 245% and cache-misses reduced by 20.8%.
 
 <pre>
-# started on Thu Apr 27 09:56:18 2023
+# started on Fri Apr 28 13:03:21 2023
 
 
  Performance counter stats for './hash-tables.out' (10 runs):
 
-    17,420,255,784      cycles:u                                                                ( +-  9.56% )
-    16,574,313,711      instructions:u                   #    1.73  insn per cycle              ( +-  9.57% )
-       813,839,750      cache-references:u                                                      ( +-  9.58% )
-        37,387,852      cache-misses:u                   #    8.352 % of all cache refs         ( +-  9.15% )
-       167,624,636      bus-cycles:u                                                            ( +-  9.56% )
+   126,165,249,108      cycles:u                                                                ( +-  9.56% )
+   115,004,589,124      instructions:u                   #    1.66  insn per cycle              ( +-  9.57% )
+     6,864,306,202      cache-references:u                                                      ( +-  9.56% )
+       499,472,709      cache-misses:u                   #   13.220 % of all cache refs         ( +-  9.56% )
+     1,214,329,005      bus-cycles:u                                                            ( +-  9.56% )
 
-           0.70960 +- 0.00118 seconds time elapsed  ( +-  0.17% )
+            5.0796 +- 0.0135 seconds time elapsed  ( +-  0.27% )
 
 
 </pre>
@@ -219,18 +224,18 @@ int find_elem_inlined_asm (hashtable_t *hashtable, word_t *word)
 ```
 
 <pre>
-# started on Thu Apr 27 09:56:26 2023
+# started on Fri Apr 28 13:30:00 2023
 
 
  Performance counter stats for './hash-tables.out' (10 runs):
 
-    17,524,611,910      cycles:u                                                                ( +-  9.56% )
-    16,460,237,725      instructions:u                   #    1.71  insn per cycle              ( +-  9.57% )
-       810,235,791      cache-references:u                                                      ( +-  9.56% )
-        36,933,494      cache-misses:u                   #    8.316 % of all cache refs         ( +-  9.20% )
-       168,681,121      bus-cycles:u                                                            ( +-  9.56% )
+   126,118,217,905      cycles:u                                                                ( +-  9.57% )
+   113,863,804,342      instructions:u                   #    1.64  insn per cycle              ( +-  9.57% )
+     6,823,876,663      cache-references:u                                                      ( +-  9.59% )
+       508,751,355      cache-misses:u                   #   13.555 % of all cache refs         ( +-  9.45% )
+     1,213,961,264      bus-cycles:u                                                            ( +-  9.57% )
 
-           0.71451 +- 0.00184 seconds time elapsed  ( +-  0.26% )
+            5.0787 +- 0.0129 seconds time elapsed  ( +-  0.25% )
 
 
 </pre>
@@ -238,14 +243,20 @@ int find_elem_inlined_asm (hashtable_t *hashtable, word_t *word)
 We don't have time performance boost. Therefore we stop optimising this function.
 
 <pre>
-+   66.37%     1.08%  hash-tables.out  hash-tables.out       [.] find_elem_inlined_asm (inlined)
-+   62.68%    31.34%  hash-tables.out  hash-tables.out       [.] find_word_in_list
-
+-   74.12%    39.31%  hash-tables.out  hash-tables.out       [.] find_word_in_list
+   + 37.76% _start
+   - 34.85% find_word_in_list
+-   18.94%    18.94%  hash-tables.out  hash-tables.out       [.] .hash
+      - main
+         + 18.19% find_words_crc32
+-   15.30%    15.30%  hash-tables.out  libc.so.6             [.] 0x0000000000155bab
+   - main
+      + 15.05% find_words_crc32
 </pre>
 
 ## Recursion
 
-Now let's optimise get_word_in_list function. Main time expenses is recursive way of checking list's element:
+Now let's optimise find_word_in_list function. Main time expenses is recursive way of checking list's element:
 
 ```C
 bool find_word_in_list (list_t *list, word_t *word, size_t position)
@@ -306,23 +317,23 @@ bool find_word_in_list (list_t *list, word_t *word, size_t position)
  Stats:
 
 <pre>
-# started on Thu Apr 27 09:56:34 2023
+# started on Fri Apr 28 13:05:05 2023
 
 
  Performance counter stats for './hash-tables.out' (10 runs):
 
-    15,340,506,011      cycles:u                                                                ( +-  9.57% )
-    13,875,621,168      instructions:u                   #    1.64  insn per cycle              ( +-  9.57% )
-       876,930,244      cache-references:u                                                      ( +-  9.58% )
-        37,589,941      cache-misses:u                   #    7.785 % of all cache refs         ( +-  9.32% )
-       147,612,401      bus-cycles:u                                                            ( +-  9.57% )
+   108,317,935,603      cycles:u                                                                ( +-  9.57% )
+    91,856,658,090      instructions:u                   #    1.54  insn per cycle              ( +-  9.57% )
+     7,364,653,954      cache-references:u                                                      ( +-  9.55% )
+       484,105,309      cache-misses:u                   #   11.933 % of all cache refs         ( +-  9.54% )
+     1,042,521,607      bus-cycles:u                                                            ( +-  9.57% )
 
-           0.62583 +- 0.00124 seconds time elapsed  ( +-  0.20% )
+           4.36241 +- 0.00683 seconds time elapsed  ( +-  0.16% )
 
 
 </pre>
 
-We get 14% improvement in time and don't have any change in cache-misses if we take error into account.
+We get 16% improvement in time and don't have any change in cache-misses if we take error into account.
 
 ## Strcmp
 
@@ -356,18 +367,18 @@ bool avx_wordcmp (word_t *word1, word_t *word2)
 ```
 
 <pre>
-# started on Thu Apr 27 09:56:42 2023
+# started on Fri Apr 28 13:05:50 2023
 
 
  Performance counter stats for './hash-tables.out' (10 runs):
 
-    16,421,661,557      cycles:u                                                                ( +-  9.57% )
-    18,513,034,554      instructions:u                   #    2.05  insn per cycle              ( +-  9.57% )
-       544,304,449      cache-references:u                                                      ( +-  9.58% )
-        40,300,203      cache-misses:u                   #   13.504 % of all cache refs         ( +-  9.48% )
-       158,188,150      bus-cycles:u                                                            ( +-  9.57% )
+   117,925,379,164      cycles:u                                                                ( +-  9.57% )
+   131,448,359,972      instructions:u                   #    2.03  insn per cycle              ( +-  9.57% )
+     4,585,284,673      cache-references:u                                                      ( +-  9.55% )
+       461,886,162      cache-misses:u                   #   18.289 % of all cache refs         ( +-  9.53% )
+     1,135,010,810      bus-cycles:u                                                            ( +-  9.57% )
 
-           0.67035 +- 0.00199 seconds time elapsed  ( +-  0.30% )
+            4.7471 +- 0.0125 seconds time elapsed  ( +-  0.26% )
 
 
 </pre>
@@ -390,18 +401,18 @@ Now we will briefly repeat previous part of work but we will align words using *
 ## Gereral performance
 
 <pre>
-# started on Thu Apr 27 09:56:50 2023
+# started on Fri Apr 28 13:06:39 2023
 
 
  Performance counter stats for './hash-tables.out' (10 runs):
 
-    49,623,508,827      cycles:u                                                                ( +-  9.57% )
-    37,385,070,117      instructions:u                   #    1.37  insn per cycle              ( +-  9.57% )
-       886,291,124      cache-references:u                                                      ( +-  9.58% )
-        99,567,778      cache-misses:u                   #   20.450 % of all cache refs         ( +-  9.55% )
-       477,523,244      bus-cycles:u                                                            ( +-  9.57% )
+   398,270,300,397      cycles:u                                                                ( +-  9.57% )
+   287,027,505,576      instructions:u                   #    1.31  insn per cycle              ( +-  9.57% )
+     7,438,727,985      cache-references:u                                                      ( +-  9.58% )
+     1,452,248,583      cache-misses:u                   #   35.583 % of all cache refs         ( +-  9.56% )
+     3,832,555,188      bus-cycles:u                                                            ( +-  9.57% )
 
-           2.00808 +- 0.00242 seconds time elapsed  ( +-  0.12% )
+           16.0166 +- 0.0100 seconds time elapsed  ( +-  0.06% )
 
 
 </pre>
@@ -411,41 +422,41 @@ Now we will briefly repeat previous part of work but we will align words using *
 Stats after using crc32 in assembly:
 
 <pre>
-# started on Thu Apr 27 09:57:11 2023
+# started on Fri Apr 28 13:09:20 2023
 
 
  Performance counter stats for './hash-tables.out' (10 runs):
 
-    18,002,737,268      cycles:u                                                                ( +-  9.57% )
-    16,889,223,424      instructions:u                   #    1.70  insn per cycle              ( +-  9.57% )
-       871,339,419      cache-references:u                                                      ( +-  9.57% )
-        87,950,704      cache-misses:u                   #   18.354 % of all cache refs         ( +-  9.38% )
-       173,230,147      bus-cycles:u                                                            ( +-  9.57% )
+   127,712,154,761      cycles:u                                                                ( +-  9.57% )
+   112,774,403,060      instructions:u                   #    1.61  insn per cycle              ( +-  9.57% )
+     7,249,243,794      cache-references:u                                                      ( +-  9.57% )
+       995,732,862      cache-misses:u                   #   24.971 % of all cache refs         ( +-  9.64% )
+     1,228,981,874      bus-cycles:u                                                            ( +-  9.57% )
 
-          0.738348 +- 0.000990 seconds time elapsed  ( +-  0.13% )
+           5.14597 +- 0.00920 seconds time elapsed  ( +-  0.18% )
 
 
 </pre>
 
-Execution time reduced by 172%.
+Execution time reduced by 211%.
 
 ### Inlining
 
 Stats after inlining:
 
 <pre>
-# started on Thu Apr 27 09:57:20 2023
+# started on Fri Apr 28 13:10:13 2023
 
 
  Performance counter stats for './hash-tables.out' (10 runs):
 
-    17,853,610,009      cycles:u                                                                ( +-  9.56% )
-    16,775,145,261      instructions:u                   #    1.71  insn per cycle              ( +-  9.57% )
-       878,108,331      cache-references:u                                                      ( +-  9.59% )
-        87,260,191      cache-misses:u                   #   18.091 % of all cache refs         ( +-  9.28% )
-       171,794,443      bus-cycles:u                                                            ( +-  9.56% )
+   126,299,673,587      cycles:u                                                                ( +-  9.57% )
+   111,633,623,626      instructions:u                   #    1.61  insn per cycle              ( +-  9.57% )
+     7,295,683,839      cache-references:u                                                      ( +-  9.55% )
+       981,095,931      cache-misses:u                   #   24.569 % of all cache refs         ( +-  9.53% )
+     1,215,578,817      bus-cycles:u                                                            ( +-  9.57% )
 
-           0.73485 +- 0.00312 seconds time elapsed  ( +-  0.42% )
+            5.0958 +- 0.0105 seconds time elapsed  ( +-  0.21% )
 
 
 </pre>
@@ -459,23 +470,23 @@ There we also don't have time performance boost.
 After removing recursion we have these stats:
 
 <pre>
-# started on Thu Apr 27 09:57:28 2023
+# started on Fri Apr 28 13:11:05 2023
 
 
  Performance counter stats for './hash-tables.out' (10 runs):
 
-    15,808,396,618      cycles:u                                                                ( +-  9.56% )
-    14,190,532,059      instructions:u                   #    1.63  insn per cycle              ( +-  9.57% )
-       950,121,548      cache-references:u                                                      ( +-  9.57% )
-        86,379,617      cache-misses:u                   #   16.509 % of all cache refs         ( +-  9.27% )
-       152,115,545      bus-cycles:u                                                            ( +-  9.56% )
+   107,519,857,079      cycles:u                                                                ( +-  9.57% )
+    89,626,473,183      instructions:u                   #    1.52  insn per cycle              ( +-  9.57% )
+     7,863,716,115      cache-references:u                                                      ( +-  9.57% )
+       936,681,003      cache-misses:u                   #   21.685 % of all cache refs         ( +-  9.56% )
+     1,034,597,332      bus-cycles:u                                                            ( +-  9.57% )
 
-           0.65053 +- 0.00121 seconds time elapsed  ( +-  0.19% )
+            4.3375 +- 0.0113 seconds time elapsed  ( +-  0.26% )
 
 
 </pre>
 
-Boost in time is 13%.
+Boost in time is 17.5%.
 
 ### Strcmp
 
@@ -505,41 +516,58 @@ bool avx_wordcmp (word_t *word1, word_t *word2)
 Stats after using words compare function:
 
 <pre>
-# started on Thu Apr 27 09:57:36 2023
+# started on Fri Apr 28 13:16:35 2023
 
 
  Performance counter stats for './hash-tables.out' (10 runs):
 
-    15,765,605,511      cycles:u                                                                ( +-  9.57% )
-    15,848,639,828      instructions:u                   #    1.83  insn per cycle              ( +-  9.57% )
-       617,968,566      cache-references:u                                                      ( +-  9.61% )
-        75,244,448      cache-misses:u                   #   22.276 % of all cache refs         ( +-  9.36% )
-       151,702,992      bus-cycles:u                                                            ( +-  9.57% )
+   108,504,445,415      cycles:u                                                                ( +-  9.57% )
+   103,776,027,276      instructions:u                   #    1.74  insn per cycle              ( +-  9.57% )
+     5,022,120,826      cache-references:u                                                      ( +-  9.58% )
+       762,949,010      cache-misses:u                   #   27.644 % of all cache refs         ( +-  9.56% )
+     1,044,143,344      bus-cycles:u                                                            ( +-  9.57% )
 
-           0.64829 +- 0.00105 seconds time elapsed  ( +-  0.16% )
+           4.37398 +- 0.00599 seconds time elapsed  ( +-  0.14% )
 
 
 </pre>
 
-We don't have any difference in time performance but make cache-misses worse.
+We have small difference in time performance but we made cache-misses worse.
 
 ## Conclusion
 
 Stats relative to general performance:
 
-Optimisation     | Intime allocation | Preallocated        
+Optimisation     | In time allocation, s | Preallocated, s        
 -----------------|------------------|-------------         
-No               |      2.104600          |      2.008080              
-Assambly         |      0.709600 ( -196%)   |      0.738348  ( -171%)      
-Inlined Assembly |      0.714510 ( -194%)   |      0.734850  ( -173%)      
-Cycle            |      0.625830 ( -236%)   |      0.650530  ( -208%)      
-AVX strcmp       |      0.670350 ( -213%)   |      0.648290  ( -209%)      
+No               |      17.545000          |      16.016600              
+Assambly crc32         |      5.079600 ( -245%)   |      5.145970  ( -211%)      
++Inlined Assembly crc32 |      5.078700 ( -245%)   |      5.095800  ( -214%)      
++Cycle instead recursion            |      4.362410 ( -302%)   |      4.337500  ( -269%)      
++AVX strcmp       |      4.747100 ( -269%)   |      4.373980  ( -266%)      
 
 
-Using prealigned and prealloced words we have 209% improvement in time performance and don't have improvement in cache-misses if we taking the error into account.
-Without prealigned words we have 213% boost in time performance and we don't have any changes in cache-misses if we taking into account the error.
+We can say that we don't need to use AVX optimisation because it becomes the most time time consuming function. Strcmp is only 1% of searching function. Maybe if we had word data base only with very long words we would have some benefit from this optimisation.
 
-With prealloced words time performance is 3% better.
+<pre>
+-   68.51%    34.08%  hash-tables.out  hash-tables.out       [.] find_word_in_list
+   - 34.42% find_word_in_list
+        ...
+        1.06% strcmp@plt
+   + 33.66% _start
++   21.97%    21.97%  hash-tables.out  hash-tables.out       [.] .hash
+</pre>
+
+<pre>
+-   74.45%    24.42%  hash-tables.out  hash-tables.out       [.] find_word_in_list
+   - 50.03% find_word_in_list
+      + 49.98% avx_wordcmp
+</pre>
+
+Without avx optimisation and using prealigned and prealloced words we have 269% improvement in time performance and have improvement in cache-misses on 14%.
+Without prealigned words we have 302% boost in time performance and we reduced cache-misses by 22%.
+
+With prealloced words time performance is 0.5% better but with error we don't have any benefit.
 
 Ded's performance coefficient:
 

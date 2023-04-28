@@ -15,13 +15,13 @@ int main ()
         return paste_perf_in_readme();
 }
 
-const char *TABLE = "Optimisation     | Intime allocation | Preallocated        \n"
+const char *TABLE = "Optimisation     | In time allocation, s | Preallocated, s        \n"
                     "-----------------|------------------|-------------         \n"
                     "No               |      %f          |      %f              \n"
-                    "Assambly         |      %f ( -%d%%)   |      %f  ( -%d%%)      \n"
-                    "Inlined Assembly |      %f ( -%d%%)   |      %f  ( -%d%%)      \n"
-                    "Cycle            |      %f ( -%d%%)   |      %f  ( -%d%%)      \n"
-                    "AVX strcmp       |      %f ( -%d%%)   |      %f  ( -%d%%)      \n%n";
+                    "Assambly crc32         |      %f ( -%d%%)   |      %f  ( -%d%%)      \n"
+                    "+Inlined Assembly crc32 |      %f ( -%d%%)   |      %f  ( -%d%%)      \n"
+                    "+Cycle instead recursion            |      %f ( -%d%%)   |      %f  ( -%d%%)      \n"
+                    "+AVX strcmp       |      %f ( -%d%%)   |      %f  ( -%d%%)      \n%n";
 
 int paste_perf_in_readme ()
 {
