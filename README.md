@@ -7,7 +7,7 @@
 2) [Hashfunctions](#hashfuncs-overview)
 2) [Optimisation](#optimisation)
 3) [Tests without prealocation](#general-performance)
-4) [Tests with prealocation](#prealigned-and-prealloced-words)
+4) [Tests with prealocation](#prealigned-and-preallocated-words)
 5) [Conclusion](#conclusion)
 
 ### What is it?
@@ -337,7 +337,7 @@ We get 16% improvement in time and don't have any change in cache-misses if we t
 
 ## Strcmp
 
-Now lets change strcmp. We will compare words which contain their length and pointer to string. For comparing strings we will use avx intrinsics. We didn't align and didn't prealloced strings before searching tests ([See next part with aligned and prealloced words](#prealigned-and-prealloced-words)):
+Now lets change strcmp. We will compare words which contain their length and pointer to string. For comparing strings we will use avx intrinsics. We didn't align and didn't preallocated strings before searching tests ([See next part with aligned and preallocated words](#prealigned-and-preallocated-words)):
 
 ```C
 bool avx_wordcmp (word_t *word1, word_t *word2)
@@ -394,7 +394,7 @@ Results after:
 </pre>
 
 
-# Prealigned and prealloced words
+# Prealigned and preallocated words
 
 Now we will briefly repeat previous part of work but we will align words using **aligned_alloc()**, preparing them for avx optimisation before testing search.
 
@@ -547,7 +547,7 @@ Assambly crc32         |      5.079600 ( -245%)   |      5.145970  ( -211%)
 +AVX strcmp       |      4.747100 ( -269%)   |      4.373980  ( -266%)      
 
 
-We can say that we don't need to use AVX optimisation because it becomes the most time time consuming function. Strcmp is only 1% of searching function. Maybe if we had word data base only with very long words we would have some benefit from this optimisation.
+We can say that we don't need to use AVX optimisation because it becomes the most time consuming function. Strcmp is only 1% of searching function. Maybe if we had word data base only with very long words we would have some benefit from this optimisation.
 
 <pre>
 -   68.51%    34.08%  hash-tables.out  hash-tables.out       [.] find_word_in_list
@@ -564,10 +564,10 @@ We can say that we don't need to use AVX optimisation because it becomes the mos
       + 49.98% avx_wordcmp
 </pre>
 
-Without avx optimisation and using prealigned and prealloced words we have 269% improvement in time performance and have improvement in cache-misses on 14%.
+Without avx optimisation and using prealigned and preallocated words we have 269% improvement in time performance and have improvement in cache-misses on 14%.
 Without prealigned words we have 302% boost in time performance and we reduced cache-misses by 22%.
 
-With prealloced words time performance is 0.5% better but with error we don't have any benefit.
+With preallocated words time performance is 0.5% better but with error we don't have any benefit.
 
 Ded's performance coefficients:
 
