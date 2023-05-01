@@ -4,8 +4,8 @@
 ## Overview
 
 1) [Introduction](#what-is-it?)
-2) [Hashfunctions](#hashfuncs-overview)
-2) [Optimisation](#optimisation)
+2) [Hashfunctions](#hashfunctions-overview)
+2) [Optimization](#optimization)
 3) [Tests without prealocation](#general-performance)
 4) [Tests with prealocation](#prealigned-and-preallocated-words)
 5) [Conclusion](#conclusion)
@@ -23,9 +23,9 @@ A hashtable or hash map is a data structure that implements an associative array
 3. This hashcodes is the indexes of lists in hashtable.
 4. If words has the same hash they are inserted into next position in list.
 
-## Hashfuncs overview
+## Hashfunctions overview
 
-Before testing hashtable we need to choose the best hash function. We have 6 function to compare:
+Before testing hashtable we need to choose the best hash function. We have 6 functions to compare:
 
 Number |    Func    | Description
 -------|----------- | -------------
@@ -36,7 +36,7 @@ Number |    Func    | Description
  5 | rol            | for i in strlen(word): hash = rol(hash) ^ word[i]
  6 | crc32          | ...
 
-Element distribution for each function is on the graph (y - number of elements in list, x - list number):
+Element distribution for each function is on the graph (vertical axis - number of elements in list, horizontal axis - list number):
 
 ![Alt graphs](https://github.com/XelerT/hashtable/blob/main/imgs/graphs.png)
 
@@ -45,7 +45,7 @@ After analyzing graphs, we can say that rol and crc32 can be used as hash-functi
 >**Note:** Tests were done using hashtable size equals 521.
 
 
-## Optimisation
+## Optimization
 ---
 In this part of project **crc32** was chosen as hash function.
 
@@ -74,7 +74,7 @@ Also you can generate README.md file with your last perf stats:
 </details>
 
 
-Without any optimisations we have these results:
+Without any optimizations we have these results:
 
 <pre>
 # started on Fri Apr 28 13:00:24 2023
@@ -96,7 +96,8 @@ Without any optimisations we have these results:
 Main time-consuming functions:
 
 <pre>
--   69.53%    69.53%  hash-tables.out  hash-tables.out       [.] get_crc32_hash           main
+-   69.53%    69.53%  hash-tables.out  hash-tables.out       [.] get_crc32_hash
+        - main
          - 68.02% find_words_crc32
             - 67.98% find_elem
                  get_crc32_hash
@@ -110,7 +111,7 @@ Main time-consuming functions:
       + 5.28% find_words_crc32
 </pre>
 
-## Assembler optimisation
+## Assembler optimization
 
 Firstly we need to optimise the most consuming function - get_crc32_hash:
 
@@ -167,7 +168,7 @@ asm_get_crc32_hash:
         ret
 ```
 
-Result of this optimisation is very good. Time performance boost is 245% and cache-misses reduced by 20.8%.
+Result of this optimization is very good. Execution time decreased by 3.45 times and cache-misses reduced by 20.8%.
 
 <pre>
 # started on Fri Apr 28 13:03:21 2023
@@ -188,7 +189,7 @@ Result of this optimisation is very good. Time performance boost is 245% and cac
 
 ### Inlined asm
 
-Using inlining, we can try to get more from assembly optimisation. We will use inline assembly in function which find elements.
+Using inlining, we can try to get more from assembly optimization. We will use inline assembly in function which find elements.
 
 ```C
 
@@ -333,7 +334,7 @@ bool find_word_in_list (list_t *list, word_t *word, size_t position)
 
 </pre>
 
-We get 16% improvement in time and don't have any change in cache-misses if we take error into account.
+Program has been improved, being 1.16x faster and we don't have any change in cache-misses if we take error into account.
 
 ## Strcmp
 
@@ -396,7 +397,7 @@ Results after:
 
 # Prealigned and preallocated words
 
-Now we will briefly repeat previous part of work but we will align words using **aligned_alloc()**, preparing them for avx optimisation before testing search.
+Now we will briefly repeat previous part of work but we will align words using **aligned_alloc()**, preparing them for avx optimization before testing search.
 
 ## Gereral performance
 
@@ -417,7 +418,7 @@ Now we will briefly repeat previous part of work but we will align words using *
 
 </pre>
 
-## Assembler optimisation
+## Assembler optimization
 
 Stats after using crc32 in assembly:
 
@@ -486,7 +487,7 @@ After removing recursion we have these stats:
 
 </pre>
 
-Boost in time is 17.5%.
+Time reduced by 1.18 times.
 
 ### Strcmp
 
@@ -538,16 +539,16 @@ We have small difference in time performance but we made cache-misses worse.
 
 Stats relative to general performance:
 
-Optimisation     | In time allocation, s | Preallocated, s        
+Optimisation     | In time allocation, s (reduced by) | Preallocated, s        
 -----------------|------------------|-------------         
 No               |      17.545000          |      16.016600              
-Assambly crc32         |      5.079600 ( -245%)   |      5.145970  ( -211%)      
-+Inlined Assembly crc32 |      5.078700 ( -245%)   |      5.095800  ( -214%)      
-+Cycle instead recursion            |      4.362410 ( -302%)   |      4.337500  ( -269%)      
-+AVX strcmp       |      4.747100 ( -269%)   |      4.373980  ( -266%)      
+Assambly crc32         |      5.079600 (3.45)   |      5.145970  (3.11)      
++Inlined Assembly crc32 |      5.078700 (3.45)   |      5.095800  (3.14)      
++Cycle instead recursion            |      4.362410 (4.02)   |      4.337500  (3.69)      
++AVX strcmp       |      4.747100 (3.70)   |      4.373980  (3.66)      
 
 
-We can say that we don't need to use AVX optimisation because it becomes the most time consuming function. Strcmp is only 1% of searching function. Maybe if we had word data base only with very long words we would have some benefit from this optimisation.
+We can say that we don't need to use AVX optimization because it becomes the most time consuming function. Strcmp is only 1% of find_word_in_list function. Maybe if we had word data base only with very long words we would have some benefit from this optimization.
 
 <pre>
 -   68.51%    34.08%  hash-tables.out  hash-tables.out       [.] find_word_in_list
@@ -564,7 +565,7 @@ We can say that we don't need to use AVX optimisation because it becomes the mos
       + 49.98% avx_wordcmp
 </pre>
 
-Without avx optimisation and using prealigned and preallocated words we have 269% improvement in time performance and have improvement in cache-misses on 14%.
+Without avx optimization and using prealigned and preallocated words we have 269% improvement in time performance and have improvement in cache-misses on 14%.
 Without prealigned words we have 302% boost in time performance and we reduced cache-misses by 22%.
 
 With preallocated words time performance is 0.5% better but with error we don't have any benefit.

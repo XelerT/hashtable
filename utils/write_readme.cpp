@@ -15,13 +15,13 @@ int main ()
         return paste_perf_in_readme();
 }
 
-const char *TABLE = "Optimisation     | In time allocation, s | Preallocated, s        \n"
+const char *TABLE = "Optimisation     | In time allocation, s (reduced by) | Preallocated, s        \n"
                     "-----------------|------------------|-------------         \n"
                     "No               |      %f          |      %f              \n"
-                    "Assambly crc32         |      %f ( -%d%%)   |      %f  ( -%d%%)      \n"
-                    "+Inlined Assembly crc32 |      %f ( -%d%%)   |      %f  ( -%d%%)      \n"
-                    "+Cycle instead recursion            |      %f ( -%d%%)   |      %f  ( -%d%%)      \n"
-                    "+AVX strcmp       |      %f ( -%d%%)   |      %f  ( -%d%%)      \n%n";
+                    "Assambly crc32         |      %f (%0.2f)   |      %f  (%0.2f)      \n"
+                    "+Inlined Assembly crc32 |      %f (%0.2f)   |      %f  (%0.2f)      \n"
+                    "+Cycle instead recursion            |      %f (%0.2f)   |      %f  (%0.2f)      \n"
+                    "+AVX strcmp       |      %f (%0.2f)   |      %f  (%0.2f)      \n%n";
 
 int paste_perf_in_readme ()
 {
@@ -75,10 +75,10 @@ int paste_perf_in_readme ()
         int chars_from_table = 0;
         while (readme_chars_left) {
                 if (!strncmp(readme_symb, "!*!*!*TABLE", 11)) {
-                        sprintf(symb_ptr, TABLE, timing[1], timing[6], timing[2], (int)(100*(timing[1] / timing[2] - 1)), timing[7], (int)(100*(timing[6] / timing[7] - 1)),
-                                                                       timing[3], (int)(100*(timing[1] / timing[3] - 1)), timing[8], (int)(100*(timing[6] / timing[8] - 1)),
-                                                                       timing[4], (int)(100*(timing[1] / timing[4] - 1)),  timing[9], (int)(100*(timing[6] / timing[9] - 1)),
-                                                                       timing[5], (int)(100*(timing[1] / timing[5] - 1)), timing[10], (int)(100*(timing[6] / timing[10] - 1)),
+                        sprintf(symb_ptr, TABLE, timing[1], timing[6], timing[2], ((timing[1] / timing[2])), timing[7], ((timing[6] / timing[7])),
+                                                                       timing[3], ((timing[1] / timing[3])), timing[8], ((timing[6] / timing[8])),
+                                                                       timing[4], ((timing[1] / timing[4])), timing[9], ((timing[6] / timing[9])),
+                                                                       timing[5], ((timing[1] / timing[5])), timing[10], ((timing[6] / timing[10])),
                                                                         &chars_from_table);
                         readme_symb       += 17;
                         readme_chars_left -= 17;

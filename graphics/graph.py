@@ -32,8 +32,7 @@ for line, ax in zip(file, axs.ravel()):
         if name == 'my':
                 continue
 
-        ax.bar(x, y)
-        # plt.xticks(np.arange(0, i, step=1))
+        ax.bar(x, y, width=1)
 
         ax.set_title(name)
         ax.set_xlabel("list number")
@@ -63,8 +62,7 @@ for line in file:
         if name != 'crc32':
                 continue
 
-        ax.bar(x, y)
-        # plt.xticks(np.arange(0, i, step=1))
+        ax.bar(x, y, width=1)
 
         ax.set_title(name)
         ax.set_xlabel("list number")
