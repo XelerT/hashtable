@@ -439,7 +439,7 @@ Stats after using crc32 in assembly:
 
 </pre>
 
-Execution time reduced by 211%.
+Execution time reduced by 3.11 times.
 
 ### Inlining
 
@@ -565,10 +565,10 @@ We can say that we don't need to use AVX optimization because it becomes the mos
       + 49.98% avx_wordcmp
 </pre>
 
-Without avx optimization and using prealigned and preallocated words we have 269% improvement in time performance and have improvement in cache-misses on 14%.
-Without prealigned words we have 302% boost in time performance and we reduced cache-misses by 22%.
+Without avx optimization and using prealigned and preallocated words we have reduced execution time by 3.69 times and we have improvement in cache-misses on 14%.
+Without prealigned words we have reduced execution time by 4.02 times and we decreased cache-misses by 22%.
 
-With preallocated words time performance is 0.5% better but with error we don't have any benefit.
+Without preallocated words program is working 1.01 times slower but with error we don't have any benefit.
 
 Ded's performance coefficients:
 
