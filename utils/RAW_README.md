@@ -98,7 +98,7 @@ Main time-consuming functions:
       + 5.28% find_words_crc32
 </pre>
 
-## Assembler optimization
+## Assembly optimization
 
 Firstly we need to optimise the most consuming function - get_crc32_hash:
 
@@ -340,7 +340,7 @@ Now we will briefly repeat previous part of work but we will align words using *
 !*!*!* 6*!*!*!
 </pre>
 
-## Assembler optimization
+## Assembly optimization
 
 Stats after using crc32 in assembly:
 
