@@ -15,7 +15,7 @@ int main ()
         return paste_perf_in_readme();
 }
 
-const char *TABLE = "Optimisation     | In time allocation, s (reduced by) | Preallocated, s        \n"
+const char *TABLE = "Optimisation     | In time allocation, s (reduced by) | Preallocated, s (reduced by)  \n"
                     "-----------------|------------------|-------------         \n"
                     "No               |      %f          |      %f              \n"
                     "Assambly crc32         |      %f (%0.2f)   |      %f  (%0.2f)      \n"

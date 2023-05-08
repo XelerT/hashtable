@@ -161,7 +161,7 @@ Result of this optimization is very good. Execution time decreased by 3.45 times
 !*!*!* 4*!*!*!
 </pre>
 
-### Inlined asm
+### Inlined assembly
 
 Using inlining, we can try to get more from assembly optimization. We will use inline assembly in function which find elements.
 

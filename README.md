@@ -187,7 +187,7 @@ Result of this optimization is very good. Execution time decreased by 3.45 times
 
 </pre>
 
-### Inlined asm
+### Inlined assembly
 
 Using inlining, we can try to get more from assembly optimization. We will use inline assembly in function which find elements.
 
@@ -539,13 +539,13 @@ We have small difference in time performance but we made cache-misses worse.
 
 Stats relative to general performance:
 
-Optimisation     | In time allocation, s (reduced by) | Preallocated, s        
------------------|------------------|-------------         
-No               |      17.545000          |      16.016600              
-Assambly crc32         |      5.079600 (3.45)   |      5.145970  (3.11)      
-+Inlined Assembly crc32 |      5.078700 (3.45)   |      5.095800  (3.14)      
-+Cycle instead recursion            |      4.362410 (4.02)   |      4.337500  (3.69)      
-+AVX strcmp       |      4.747100 (3.70)   |      4.373980  (3.66)      
+Optimisation     | In time allocation, s (reduced by) | Preallocated, s (reduced by)
+-----------------|------------------|-------------
+No               |      17.545000          |      16.016600
+Assambly crc32         |      5.079600 (3.45)   |      5.145970  (3.11)
++Inlined Assembly crc32 |      5.078700 (3.45)   |      5.095800  (3.14)
++Cycle instead recursion            |      4.362410 (4.02)   |      4.337500  (3.69)
++AVX strcmp       |      4.747100 (3.70)   |      4.373980  (3.66)
 
 
 We can say that we don't need to use AVX optimization because it becomes the most time consuming function. Strcmp is only 1% of find_word_in_list function. Maybe if we had word data base only with very long words we would have some benefit from this optimization.
