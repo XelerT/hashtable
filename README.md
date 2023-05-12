@@ -72,6 +72,7 @@ Also you can generate README.md file with your last perf stats:
         $ make write_readme
 
 Used perf utils:
+
         $ perf stat -o perf_stats/perf_stat1.txt -r 10 -e cycles,instructions,cache-references,cache-misses,bus-cycles ./hash-tables.out
         $ perf record --call-graph dwarf ./hash-tables.out
 </details>
