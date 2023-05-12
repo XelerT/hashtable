@@ -18,7 +18,7 @@ int main ()
 const char *TABLE = "Optimisation     | In time allocation, s (reduced by) | Preallocated, s (reduced by)  \n"
                     "-----------------|------------------|-------------         \n"
                     "No               |      %f          |      %f              \n"
-                    "Assambly crc32         |      %f (%0.2f)   |      %f  (%0.2f)      \n"
+                    "Assembly crc32         |      %f (%0.2f)   |      %f  (%0.2f)      \n"
                     "+Inlined Assembly crc32 |      %f (%0.2f)   |      %f  (%0.2f)      \n"
                     "+Cycle instead recursion            |      %f (%0.2f)   |      %f  (%0.2f)      \n"
                     "+AVX strcmp       |      %f (%0.2f)   |      %f  (%0.2f)      \n%n";

@@ -61,7 +61,7 @@ DOT_FILE_NAME   = list_graph.dot
 
 all:
 	@ nasm -f elf64 -l $(ASM_FILES).lst $(ASM_FILES).s
-	@ g++ $(OPTIM_FLAGS) -masm=intel -o $(OUTPUT) $(CFLAGS) $(CFILES) $(ASM_FILES).o -no-pie -DAVX_OPTIMISATION -DPRE_ALIGNED_WORDS
+	@ g++ $(OPTIM_FLAGS) -masm=intel -o $(OUTPUT) $(CFLAGS) $(CFILES) $(ASM_FILES).o -no-pie -D$(DFLAG1) -D$(DFLAG2)
 	@ echo Compiled c-files
 
 .PHONY: sanitize

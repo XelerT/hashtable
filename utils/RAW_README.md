@@ -71,6 +71,9 @@ Also you can generate README.md file with your last perf stats:
 
         $ make write_readme
 
+Used perf utils:
+        1) perf stat -o perf_stats/perf_stat1.txt -r 10 -e cycles,instructions,cache-references,cache-misses,bus-cycles ./hash-tables.out
+        2) perf record --call-graph dwarf ./hash-tables.out
 </details>
 
 
@@ -83,19 +86,13 @@ Without any optimizations we have these results:
 Main time-consuming functions:
 
 <pre>
--   69.53%    69.53%  hash-tables.out  hash-tables.out       [.] get_crc32_hash
-        - main
-         - 68.02% find_words_crc32
-            - 67.98% find_elem
-                 get_crc32_hash
-         + 1.43% hash_words
--   24.46%    13.06%  hash-tables.out  hash-tables.out       [.] find_word_in_list
-      - main
-         + 12.39% find_words_crc32
+   - 68.02% find_words_crc32
+        - 67.98% find_elem
+           get_crc32_hash
+        + 1.43% hash_words
+   + 12.39% find_words_crc32
    + 11.40% find_word_in_list
--    5.39%     5.39%  hash-tables.out  libc.so.6             [.]
-   - main
-      + 5.28% find_words_crc32
+   + 5.28%  find_words_crc32
 </pre>
 
 ## Assembly optimization
@@ -206,13 +203,10 @@ We don't have time performance boost. Therefore we stop optimising this function
 
 <pre>
 -   74.12%    39.31%  hash-tables.out  hash-tables.out       [.] find_word_in_list
-   + 37.76% _start
    - 34.85% find_word_in_list
 -   18.94%    18.94%  hash-tables.out  hash-tables.out       [.] .hash
-      - main
-         + 18.19% find_words_crc32
+        + 18.19% find_words_crc32
 -   15.30%    15.30%  hash-tables.out  libc.so.6             [.] 0x0000000000155bab
-   - main
       + 15.05% find_words_crc32
 </pre>
 
